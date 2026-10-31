@@ -86,6 +86,30 @@ public class RefreshReelbaseTask : IScheduledTask
         ];
     }
 
+    /// <summary>
+    /// Builds the options a library-wide refresh needs.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="MetadataRefreshMode.FullRefresh"/> is not an optimisation here, it is the only
+    /// mode that reaches a provider: with <c>Default</c> the server runs a provider only when the
+    /// item is new, its file changed, or the library's automatic refresh interval has passed, and
+    /// otherwise asks nobody - which is how a whole library gets "refreshed" in a second without
+    /// a single lookup. Artwork is still only downloaded for items that have none, because an
+    /// existing image is left alone unless <c>ReplaceAllImages</c> is set.
+    /// </remarks>
+    /// <param name="directoryService">The directory service the refresh options need.</param>
+    /// <returns>The options to refresh with.</returns>
+    internal static MetadataRefreshOptions CreateRefreshOptions(IDirectoryService directoryService)
+        => new(directoryService)
+        {
+            MetadataRefreshMode = MetadataRefreshMode.FullRefresh,
+            ImageRefreshMode = MetadataRefreshMode.FullRefresh,
+            IsAutomated = true,
+
+            // Filling gaps, not overwriting: an existing value wins over the provider's.
+            ReplaceAllMetadata = false
+        };
+
     /// <inheritdoc />
     public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
     {
@@ -122,13 +146,7 @@ public class RefreshReelbaseTask : IScheduledTask
             return;
         }
 
-        var options = new MetadataRefreshOptions(_directoryService)
-        {
-            MetadataRefreshMode = MetadataRefreshMode.Default,
-            ImageRefreshMode = MetadataRefreshMode.Default,
-            IsAutomated = true,
-            ReplaceAllMetadata = false
-        };
+        var options = CreateRefreshOptions(_directoryService);
 
         var refreshed = 0;
         progress?.Report(0);

@@ -9,12 +9,12 @@
         "imageUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/assets/icon.png",
         "versions": [
             {
-                "version": "1.5.1.0",
-                "changelog": "Find a music video whose file name keeps its separators, such as aaliyah_-_try_again.avi, and rank it by the artist the name implies.",
+                "version": "1.5.2.0",
+                "changelog": "Make the nightly refresh actually ask the providers: a whole library was being marked refreshed without a single lookup.",
                 "targetAbi": "12.0.0.0",
-                "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.5.1.0.zip",
-                "checksum": "ff5857ec95709bd08a57af41e5934613",
-                "timestamp": "2026-10-31T06:05:19Z"
+                "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.5.2.0.zip",
+                "checksum": "24c33b9474811b9e5aa6851f9fa65c9e",
+                "timestamp": "2026-10-31T06:21:18Z"
             }
         ]
     }
