@@ -2,7 +2,7 @@
 name: "Reelbase"
 guid: "816fb33f-67c2-485f-8f47-8c7877ea6e70"
 imageUrl: "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/master/assets/icon.png"
-version: 8
+version: 9
 targetAbi: "12.0.0.0"
 framework: "net10.0"
 owner: "LightNetAI"
@@ -14,5 +14,5 @@ category: "Music"
 artifacts:
   - "Jellyfin.Plugin.Reelbase.dll"
 changelog: |-
-  - Honour the Retry-After the API returns on a 429: wait it out when brief, stop until then when not.
-  - Remember a pause across restarts.
+  - Find music videos whose file name keeps its separators, such as aaliyah_-_try_again.avi.
+  - Rank a result by the artist the file name implies when the item carries none.

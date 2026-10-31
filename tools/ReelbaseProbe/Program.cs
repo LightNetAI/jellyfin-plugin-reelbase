@@ -50,6 +50,19 @@ foreach (var hit in await videoProvider.GetSearchResults(searchInfo, Cancellatio
 }
 
 Console.WriteLine();
+Console.WriteLine("=== music video search: aaliyah_-_try_again (the file name Jellyfin passes on) ===");
+foreach (var hit in await videoProvider.GetSearchResults(new MusicVideoInfo { Name = "aaliyah_-_try_again" }, CancellationToken.None))
+{
+    Console.WriteLine($"  {hit.Name} | artist={hit.AlbumArtist?.Name ?? hit.Artists?.FirstOrDefault()?.Name ?? "-"} | {hit.ProductionYear} -> {hit.ProviderIds.GetValueOrDefault("Reelbase")}");
+}
+
+Console.WriteLine();
+Console.WriteLine("=== music video metadata: aaliyah_-_try_again ===");
+PrintVideo(await videoProvider.GetMetadata(
+    new MusicVideoInfo { Name = "aaliyah_-_try_again" },
+    CancellationToken.None));
+
+Console.WriteLine();
 Console.WriteLine("=== music video metadata: Zolita - Miss Misunderstood ===");
 PrintVideo(await videoProvider.GetMetadata(
     new MusicVideoInfo { Name = "Zolita - Miss Misunderstood", Artists = new[] { "Zolita" } },

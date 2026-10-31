@@ -9,12 +9,12 @@
         "imageUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/assets/icon.png",
         "versions": [
             {
-                "version": "1.5.0.0",
-                "changelog": "Honour the Retry-After the API now returns on a 429: wait when it is brief, stop until then when it is not, and remember the wait across restarts.",
+                "version": "1.5.1.0",
+                "changelog": "Find a music video whose file name keeps its separators, such as aaliyah_-_try_again.avi, and rank it by the artist the name implies.",
                 "targetAbi": "12.0.0.0",
-                "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.5.0.0.zip",
-                "checksum": "847242f3dfb242a7c5192feb61e11455",
-                "timestamp": "2026-10-31T03:14:11Z"
+                "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.5.1.0.zip",
+                "checksum": "ff5857ec95709bd08a57af41e5934613",
+                "timestamp": "2026-10-31T06:05:19Z"
             }
         ]
     }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 
 namespace Jellyfin.Plugin.Reelbase;
@@ -9,10 +8,17 @@ namespace Jellyfin.Plugin.Reelbase;
 /// Builds the search terms a library item should be looked up with.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Reelbase matches the whole <c>q</c> value as one substring of the title, the artist name or
-/// the description - it does not split it into words. A music video is usually named
-/// <c>Artist - Title</c>, so passing that through unchanged matches nothing; the artist part is
-/// therefore stripped before the title is searched for.
+/// the description - it does not split it into words, and it does not forgive punctuation. A
+/// music video is usually named <c>Artist - Title</c>, so passing that through unchanged matches
+/// nothing; the artist part has to be taken off first.
+/// </para>
+/// <para>
+/// Jellyfin does not tidy the name it hands over. A file called <c>aaliyah_-_try_again.avi</c>
+/// arrives as <c>aaliyah_-_try_again</c>, underscores and all, so the separators are normalised
+/// to spaces before anything is looked for.
+/// </para>
 /// </remarks>
 public static class ReelbaseSearchQueries
 {
@@ -30,11 +36,23 @@ public static class ReelbaseSearchQueries
     public static IReadOnlyList<string> ForMusicVideo(string? name, IReadOnlyList<string>? artists)
     {
         var primaryArtist = FirstArtist(artists);
-        var title = StripArtistPrefix(name, primaryArtist);
+        var normalised = NormalizeName(name);
+        var title = StripArtistPrefix(normalised, primaryArtist);
         var queries = new List<string>(3);
 
-        Add(queries, title);
-        Add(queries, primaryArtist);
+        if (Split(normalised) is { } split && string.Equals(title, normalised, StringComparison.OrdinalIgnoreCase))
+        {
+            // Nothing could be taken off the name with confidence, so each half gets its own
+            // turn. Searching for the name whole is what failed: the API has no record spelled
+            // the way the file is.
+            Add(queries, split.Title);
+            Add(queries, split.Artist);
+        }
+        else
+        {
+            Add(queries, title);
+            Add(queries, primaryArtist);
+        }
 
         return queries;
     }
@@ -47,50 +65,105 @@ public static class ReelbaseSearchQueries
     /// <returns>The title to search for.</returns>
     public static string StripArtistPrefix(string? name, string? artist)
     {
+        var trimmed = NormalizeName(name);
+        if (trimmed.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        if (Split(trimmed) is not { } split)
+        {
+            return trimmed;
+        }
+
+        // Without a known artist the first half is only taken to be one when it cannot be part
+        // of the song title: a "featuring" clause, or a credited artist the name starts with.
+        if (string.IsNullOrWhiteSpace(artist))
+        {
+            return Contains(split.Artist, "feat") ? split.Title : trimmed;
+        }
+
+        return Contains(split.Artist, artist) || Contains(artist, split.Artist) ? split.Title : trimmed;
+    }
+
+    /// <summary>
+    /// Reads the artist half out of a file name that still has one, for when Jellyfin did not
+    /// work an artist out on its own: <c>aaliyah_-_try_again</c> answers <c>["aaliyah"]</c>.
+    /// </summary>
+    /// <param name="name">The name of the library item.</param>
+    /// <returns>The artist the name suggests, or an empty list when it suggests none.</returns>
+    public static IReadOnlyList<string> GuessArtists(string? name)
+        => Split(NormalizeName(name)) is { } split ? [split.Artist] : [];
+
+    /// <summary>
+    /// Turns a file name into the text the API is searched with: underscores become the spaces
+    /// they stand for, whitespace is collapsed, and a file extension is dropped.
+    /// </summary>
+    /// <param name="name">The name to normalize.</param>
+    /// <returns>The normalized name.</returns>
+    public static string NormalizeName(string? name)
+    {
         if (string.IsNullOrWhiteSpace(name))
         {
             return string.Empty;
         }
 
-        var trimmed = StripFileExtension(name.Trim());
-        var separatorIndex = FindSeparator(trimmed);
-        if (separatorIndex <= 0)
+        var value = StripFileExtension(name.Trim());
+        var builder = new StringBuilder(value.Length);
+        var pendingSeparator = false;
+
+        foreach (var character in value)
         {
-            return trimmed;
+            if (character == '_' || char.IsWhiteSpace(character))
+            {
+                pendingSeparator = builder.Length > 0;
+                continue;
+            }
+
+            if (pendingSeparator)
+            {
+                builder.Append(' ');
+                pendingSeparator = false;
+            }
+
+            builder.Append(character);
         }
 
-        var prefix = trimmed[..separatorIndex].Trim();
-        var remainder = trimmed[(separatorIndex + 3)..].Trim();
-
-        if (remainder.Length == 0)
-        {
-            return trimmed;
-        }
-
-        // Without a known artist the prefix is only taken to be one when it cannot be part of
-        // the song title: a "featuring" clause, or a credited artist that the name starts with.
-        if (string.IsNullOrWhiteSpace(artist))
-        {
-            return Contains(prefix, "feat") ? remainder : trimmed;
-        }
-
-        return Contains(prefix, artist) || Contains(artist, prefix) ? remainder : trimmed;
+        return builder.ToString();
     }
 
-    private static int FindSeparator(string value)
+    /// <summary>
+    /// Splits a normalized name into the half before the separator and the half after it.
+    /// </summary>
+    private static (string Artist, string Title)? Split(string normalised)
     {
-        var best = -1;
+        if (!TryFindSeparator(normalised, out var index, out var length) || index <= 0)
+        {
+            return null;
+        }
+
+        var artist = normalised[..index].Trim();
+        var title = normalised[(index + length)..].Trim();
+
+        return artist.Length > 0 && title.Length > 0 ? (artist, title) : null;
+    }
+
+    private static bool TryFindSeparator(string value, out int index, out int length)
+    {
+        index = -1;
+        length = 0;
 
         foreach (var separator in _separators)
         {
-            var index = value.IndexOf(separator, StringComparison.Ordinal);
-            if (index > 0 && (best < 0 || index < best))
+            var found = value.IndexOf(separator, StringComparison.Ordinal);
+            if (found > 0 && (index < 0 || found < index))
             {
-                best = index;
+                index = found;
+                length = separator.Length;
             }
         }
 
-        return best;
+        return index > 0;
     }
 
     private static string StripFileExtension(string value)

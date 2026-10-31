@@ -72,6 +72,11 @@ public static class ReelbaseMatcher
         var primaryArtist = artists is { Count: > 0 } ? artists[0] : null;
         var title = ReelbaseSearchQueries.StripArtistPrefix(name, primaryArtist);
 
+        // Jellyfin does not read an artist out of "artist_-_title", but the name still says who
+        // it is: with nothing on the item, the half before the separator is the best witness
+        // there is, and it is what tells Aaliyah's "Try Again" from the other one.
+        var credited = artists is { Count: > 0 } ? artists : ReelbaseSearchQueries.GuessArtists(name);
+
         var titleScore = Math.Max(
             ScoreText(candidate.Title, name),
             ScoreText(candidate.Title, title));
@@ -81,7 +86,7 @@ public static class ReelbaseMatcher
             return 0;
         }
 
-        return titleScore + ScoreArtist(candidate, artists) + ScoreYear(candidate.Year, year);
+        return titleScore + ScoreArtist(candidate, credited) + ScoreYear(candidate.Year, year);
     }
 
     /// <summary>

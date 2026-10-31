@@ -27,6 +27,43 @@ public class SearchTests
     }
 
     [Fact]
+    public void ForMusicVideo_SearchesTheHalvesOfAFileNameThatKeepsItsUnderscores()
+    {
+        // Jellyfin hands over the file name untouched: this is the real name it produces for
+        // aaliyah_-_try_again.avi, and no record is spelled that way.
+        var queries = ReelbaseSearchQueries.ForMusicVideo("aaliyah_-_try_again", null);
+
+        Assert.Equal(new[] { "try again", "aaliyah" }, queries);
+    }
+
+    [Fact]
+    public void ForMusicVideo_UsesTheKnownArtistWhenTheNameKeepsItsUnderscores()
+    {
+        var queries = ReelbaseSearchQueries.ForMusicVideo("aaliyah_-_try_again", new[] { "Aaliyah" });
+
+        Assert.Equal(new[] { "try again", "Aaliyah" }, queries);
+    }
+
+    [Fact]
+    public void NormalizeName_TurnsUnderscoresIntoSpacesAndDropsTheExtension()
+        => Assert.Equal("AC DC - Thunderstruck", ReelbaseSearchQueries.NormalizeName("AC_DC_-_Thunderstruck.mp4"));
+
+    [Fact]
+    public void FindBestMatch_UsesTheArtistInTheFileNameWhenTheItemHasNone()
+    {
+        // Two records share the title; only one of them is by the artist the file name names.
+        var candidates = new[]
+        {
+            new ReelbaseVideo { Title = "Try Again", Slug = "try-again-2", Artist = new ReelbaseEntityRef { Name = "Joan" }, Year = 2020 },
+            new ReelbaseVideo { Title = "Try Again", Slug = "try-again", Artist = new ReelbaseEntityRef { Name = "Aaliyah" }, Year = 2000 }
+        };
+
+        var match = ReelbaseMatcher.FindBestMatch(candidates, "aaliyah_-_try_again", null, null);
+
+        Assert.Equal("try-again", match?.Slug);
+    }
+
+    [Fact]
     public void FindBestMatch_PicksTheTitleOverTheNewestResult()
     {
         var candidates = new[]
