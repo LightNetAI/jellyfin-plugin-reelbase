@@ -119,6 +119,7 @@ static void PrintVideo(MetadataResult<MusicVideo> result)
     Console.WriteLine($"  Name: {item.Name}");
     Console.WriteLine($"  Year: {item.ProductionYear}  Released: {item.PremiereDate:yyyy-MM-dd}  Runtime: {(item.RunTimeTicks is { } t ? TimeSpan.FromTicks(t).ToString("c", CultureInfo.InvariantCulture) : "-")}");
     Console.WriteLine($"  Artists: {string.Join(", ", item.Artists ?? Array.Empty<string>())}");
+    Console.WriteLine($"  Album: {(string.IsNullOrWhiteSpace(item.Album) ? "-" : item.Album)}");
     Console.WriteLine($"  Genres: {string.Join(", ", item.Genres ?? Array.Empty<string>())}");
     Console.WriteLine($"  Studios: {string.Join(", ", item.Studios ?? Array.Empty<string>())}");
     Console.WriteLine($"  Overview: {Trim(item.Overview, 100)}");

@@ -116,6 +116,7 @@ public class ReelbaseMusicVideoProvider : IRemoteMetadataProvider<MusicVideo, Mu
             ProductionYear = video.Year,
             Overview = string.IsNullOrWhiteSpace(video.Description) ? null : video.Description.Trim(),
             PremiereDate = ParseReleaseDate(video.ReleaseDate),
+            Album = video.AlbumName,
             RunTimeTicks = video.DurationSeconds is > 0 ? TimeSpan.FromSeconds(video.DurationSeconds.Value).Ticks : null,
             Artists = GetArtists(video),
             Genres = video.Genres is null
