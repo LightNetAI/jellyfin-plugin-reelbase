@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,6 +29,12 @@ public static class ReelbaseSearchQueries
     private static readonly string[] _separators = [" - ", " – ", " — ", " —", " -", " | "];
 
     /// <summary>
+    /// The punctuation a file name and a record most often disagree about: a straight quote, a
+    /// curly one, a backtick, an accent, an exclamation or a question mark.
+    /// </summary>
+    private static readonly SearchValues<char> _disputedPunctuation = SearchValues.Create("'\u2019\u0060\u00B4!?");
+
+    /// <summary>
     /// Builds the queries to try, most specific first.
     /// </summary>
     /// <param name="name">The name of the library item.</param>
@@ -40,13 +47,28 @@ public static class ReelbaseSearchQueries
         var title = StripArtistPrefix(normalised, primaryArtist);
         var queries = new List<string>(3);
 
-        if (Split(normalised) is { } split && string.Equals(title, normalised, StringComparison.OrdinalIgnoreCase))
+        if (Split(normalised) is { } split)
         {
-            // Nothing could be taken off the name with confidence, so each half gets its own
-            // turn. Searching for the name whole is what failed: the API has no record spelled
-            // the way the file is.
+            // A title carrying a quote is where the file name and the record most often
+            // disagree about the character itself: a film of "Freedom! '90" saved as
+            // "Freedom `90" is not the same string. The bare title is matched literally and
+            // finds nothing, while the "Artist - Title" form has the punctuation forgiven and
+            // finds the record, so that form goes first when the title has one of them.
+            if (split.Title.AsSpan().IndexOfAny(_disputedPunctuation) >= 0)
+            {
+                Add(queries, normalised);
+            }
+
+            // Without a quote, the title only gets a turn of its own once the artist was known
+            // well enough to take it off the name with confidence; otherwise the halves the
+            // separator cut out are what is asked for.
+            if (!string.Equals(title, normalised, StringComparison.OrdinalIgnoreCase))
+            {
+                Add(queries, title);
+            }
+
             Add(queries, split.Title);
-            Add(queries, split.Artist);
+            Add(queries, primaryArtist ?? split.Artist);
         }
         else
         {

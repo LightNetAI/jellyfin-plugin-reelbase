@@ -45,6 +45,32 @@ public class SearchTests
     }
 
     [Fact]
+    public void ForMusicVideo_AsksForTheNameAsWrittenWhenTheTitleHasAQuote()
+    {
+        // The bare title is matched literally, so "freedom `90" finds nothing at all; the
+        // "Artist - Title" form is matched with the punctuation forgiven and finds the record.
+        var queries = ReelbaseSearchQueries.ForMusicVideo("George Michael - Freedom `90", null);
+
+        Assert.Equal(new[] { "George Michael - Freedom `90", "Freedom `90", "George Michael" }, queries);
+    }
+
+    [Fact]
+    public void ForMusicVideo_AsksForTheNameAsWrittenWhenTheArtistIsKnownAndTheTitleHasAnApostrophe()
+    {
+        var queries = ReelbaseSearchQueries.ForMusicVideo("Linkin Park - What I've Done", new[] { "Linkin Park" });
+
+        Assert.Equal(new[] { "Linkin Park - What I've Done", "What I've Done", "Linkin Park" }, queries);
+    }
+
+    [Fact]
+    public void ForMusicVideo_LeavesAQuoteFreeNameAlone()
+    {
+        var queries = ReelbaseSearchQueries.ForMusicVideo("aaliyah_-_try_again", null);
+
+        Assert.Equal(new[] { "try again", "aaliyah" }, queries);
+    }
+
+    [Fact]
     public void NormalizeName_TurnsUnderscoresIntoSpacesAndDropsTheExtension()
         => Assert.Equal("AC DC - Thunderstruck", ReelbaseSearchQueries.NormalizeName("AC_DC_-_Thunderstruck.mp4"));
 

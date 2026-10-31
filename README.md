@@ -142,6 +142,11 @@ Reelbase matches search terms as a single substring rather than word by word, so
 searches for the title first (after stripping the `Artist - ` prefix) and the artist second, then
 ranks the results by title, artist and year instead of trusting the API's ordering.
 
+A title with a quote in it is asked for by the whole name first. The API matches a bare title
+literally, so `Freedom `90` finds nothing, while the `Artist - Title` form forgives the
+punctuation and finds `Freedom! '90`. That only works when the file name still names the artist;
+a file called just `What I`ve Done.mkv` has nothing to pair the title with.
+
 ## Building
 
 ```bash

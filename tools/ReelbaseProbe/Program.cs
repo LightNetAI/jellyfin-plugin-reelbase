@@ -90,6 +90,27 @@ var second = await videoProvider.GetMetadata(
 PrintVideo(second);
 
 Console.WriteLine();
+Console.WriteLine("=== quotes in titles ===");
+var quoteCases = new[]
+{
+    "George Michael - Freedom `90",
+    "George Michael - Freedom '90",
+    "Linkin Park - What I`ve Done",
+    "Linkin Park - What I've Done",
+    "What I`ve Done",
+    "Freedom '90",
+};
+
+foreach (var name in quoteCases)
+{
+    var hits = (await videoProvider.GetSearchResults(new MusicVideoInfo { Name = name }, CancellationToken.None).ConfigureAwait(false)).ToList();
+    Console.WriteLine($"  {name}  ->  {hits.Count} hit(s) {string.Join(" ; ", hits.Take(2).Select(h => h.Name + " | " + (h.AlbumArtist?.Name ?? "-")))}");
+}
+
+var quotedMetadata = await videoProvider.GetMetadata(new MusicVideoInfo { Name = "George Michael - Freedom `90" }, CancellationToken.None);
+Console.WriteLine($"  metadata: {quotedMetadata.Item?.Name} | {quotedMetadata.Item?.Artists?.FirstOrDefault() ?? "-"} | {quotedMetadata.Item?.ProductionYear}");
+
+Console.WriteLine();
 Console.WriteLine("=== artist metadata: Zolita ===");
 var artistResult = await artistProvider.GetMetadata(new ArtistInfo { Name = "Zolita" }, CancellationToken.None);
 Console.WriteLine($"  HasMetadata={artistResult.HasMetadata} Name={artistResult.Item?.Name} Year={artistResult.Item?.ProductionYear} Url={artistResult.Item?.HomePageUrl} Id={artistResult.Item?.ProviderIds.GetValueOrDefault("Reelbase")}");
