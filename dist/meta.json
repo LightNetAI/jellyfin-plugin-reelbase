@@ -1,14 +1,14 @@
 {
     "category": "Music",
-    "changelog": "Read the album name from the record, so the album fills in as soon as the API carries one.",
+    "changelog": "Link the artist to an artist item as the metadata lands, so the Artists field fills in without waiting for a library scan.",
     "description": "Get music video metadata and artwork from a Reelbase instance. Requires a Reelbase API key, which is free to create on any Reelbase site.",
     "guid": "816fb33f-67c2-485f-8f47-8c7877ea6e70",
     "name": "Reelbase",
     "overview": "Get music video metadata and artwork from Reelbase",
     "owner": "LightNetAI",
     "targetAbi": "12.0.0.0",
-    "timestamp": "2026-10-31T06:40:30Z",
-    "version": "1.5.4.0",
+    "timestamp": "2026-10-31T12:42:10Z",
+    "version": "1.5.5.0",
     "status": "Active",
     "autoUpdate": true
 }

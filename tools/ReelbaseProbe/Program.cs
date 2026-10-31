@@ -1,7 +1,9 @@
 using System.Globalization;
+using System.Reflection;
 using Jellyfin.Plugin.Reelbase;
 using Jellyfin.Plugin.Reelbase.Providers;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Providers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -38,7 +40,10 @@ var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
 var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
 
 var limiter = provider.GetRequiredService<IReelbaseRateLimiter>();
-var videoProvider = new ReelbaseMusicVideoProvider(httpClientFactory, loggerFactory.CreateLogger<ReelbaseMusicVideoProvider>(), client);
+// The probe runs outside a server, so there is no library to link artists into. A proxy answers
+// every call with null, which is what a lookup that finds nothing looks like.
+var libraryManager = DispatchProxy.Create<ILibraryManager, NullLibraryManager>();
+var videoProvider = new ReelbaseMusicVideoProvider(httpClientFactory, loggerFactory.CreateLogger<ReelbaseMusicVideoProvider>(), client, libraryManager);
 var artistProvider = new ReelbaseMusicArtistProvider(httpClientFactory, loggerFactory.CreateLogger<ReelbaseMusicArtistProvider>(), client);
 var personProvider = new ReelbasePersonProvider(httpClientFactory, loggerFactory.CreateLogger<ReelbasePersonProvider>(), client);
 
@@ -48,6 +53,15 @@ foreach (var hit in await videoProvider.GetSearchResults(searchInfo, Cancellatio
 {
     Console.WriteLine($"  {hit.Name} | provider={hit.SearchProviderName} | artist={hit.AlbumArtist?.Name ?? hit.Artists?.FirstOrDefault()?.Name ?? "-"} | {hit.ProductionYear} -> {hit.ProviderIds.GetValueOrDefault("Reelbase")} img={hit.ImageUrl}");
 }
+
+Console.WriteLine();
+Console.WriteLine("=== music video: Blue Man Group - Time To Start ===");
+foreach (var hit in await videoProvider.GetSearchResults(new MusicVideoInfo { Name = "Blue Man Group - Time To Start" }, CancellationToken.None))
+{
+    Console.WriteLine($"  hit: {hit.Name} | artist={hit.AlbumArtist?.Name ?? "-"} -> {hit.ProviderIds.GetValueOrDefault("Reelbase")}");
+}
+
+PrintVideo(await videoProvider.GetMetadata(new MusicVideoInfo { Name = "Blue Man Group - Time To Start" }, CancellationToken.None));
 
 Console.WriteLine();
 Console.WriteLine("=== music video search: aaliyah_-_try_again (the file name Jellyfin passes on) ===");
@@ -125,11 +139,19 @@ static void PrintVideo(MetadataResult<MusicVideo> result)
     Console.WriteLine($"  Overview: {Trim(item.Overview, 100)}");
     Console.WriteLine($"  ProviderIds: {string.Join(", ", item.ProviderIds.Select(kv => kv.Key + "=" + kv.Value))}");
     Console.WriteLine($"  Images: {string.Join(", ", item.ImageInfos.Select(i => i.Path))}");
-    Console.WriteLine($"  People ({result.People.Count}):");
-    foreach (var person in result.People.Take(8))
+    Console.WriteLine($"  People ({result.People?.Count ?? 0}):");
+    foreach (var person in result.People ?? [])
     {
         Console.WriteLine($"    - {person.Name} [{person.Type}] {person.Role} {person.ProviderIds.GetValueOrDefault("Reelbase")}");
     }
+}
+
+internal class NullLibraryManager : DispatchProxy
+{
+    protected override object? Invoke(MethodInfo? targetMethod, object?[]? args)
+        => targetMethod?.ReturnType.IsValueType == true
+            ? Activator.CreateInstance(targetMethod.ReturnType)
+            : null;
 }
 
 internal sealed class StaticSettingsProvider : IReelbaseSettingsProvider

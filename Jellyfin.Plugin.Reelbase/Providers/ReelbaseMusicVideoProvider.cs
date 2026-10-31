@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Jellyfin.Plugin.Reelbase.Models;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Providers;
@@ -28,6 +29,7 @@ public class ReelbaseMusicVideoProvider : IRemoteMetadataProvider<MusicVideo, Mu
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<ReelbaseMusicVideoProvider> _logger;
     private readonly IReelbaseClient _client;
+    private readonly ILibraryManager _libraryManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ReelbaseMusicVideoProvider"/> class.
@@ -35,14 +37,17 @@ public class ReelbaseMusicVideoProvider : IRemoteMetadataProvider<MusicVideo, Mu
     /// <param name="httpClientFactory">Instance of the <see cref="IHttpClientFactory"/> interface.</param>
     /// <param name="logger">Instance of the <see cref="ILogger{ReelbaseMusicVideoProvider}"/> interface.</param>
     /// <param name="client">Instance of the <see cref="IReelbaseClient"/> interface.</param>
+    /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
     public ReelbaseMusicVideoProvider(
         IHttpClientFactory httpClientFactory,
         ILogger<ReelbaseMusicVideoProvider> logger,
-        IReelbaseClient client)
+        IReelbaseClient client,
+        ILibraryManager libraryManager)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _client = client;
+        _libraryManager = libraryManager;
     }
 
     /// <inheritdoc />
@@ -81,6 +86,13 @@ public class ReelbaseMusicVideoProvider : IRemoteMetadataProvider<MusicVideo, Mu
 
         AddPeople(result, video);
 
+        // The artist only shows on the item once an artist item exists to link to, and a refresh
+        // is not a scan, so it would otherwise stay a bare name until the next library scan.
+        ReelbaseArtistLinks.Ensure(
+            result.Item.Artists,
+            name => _libraryManager.GetArtist(name),
+            (name, ex) => _logger.LogWarning(ex, "Could not link the artist {Artist}", name));
+
         return result;
     }
 
@@ -108,7 +120,7 @@ public class ReelbaseMusicVideoProvider : IRemoteMetadataProvider<MusicVideo, Mu
     /// </summary>
     /// <param name="video">The record.</param>
     /// <returns>The item.</returns>
-    private static MusicVideo ToMusicVideo(ReelbaseVideo video)
+    internal static MusicVideo ToMusicVideo(ReelbaseVideo video)
     {
         var item = new MusicVideo
         {

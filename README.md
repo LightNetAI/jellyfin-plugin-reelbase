@@ -122,6 +122,11 @@ would rather kick it off by hand. Progress and the number of items left are writ
 2. Name the files the usual way, `Artist - Title`, so the artist can be matched.
 3. Refresh the library's metadata, or use **Identify** on an item to pick a record by hand.
 
+The artist is linked as the metadata lands. Jellyfin shows a music video's artist through the
+artist item it refers to, and it only creates those items after a **library scan**; refreshing
+metadata alone leaves the name stored but unlinked, which is why the Artists field can look empty.
+The plugin asks for the artist itself, so the link exists as soon as an item is refreshed.
+
 The refresh dialog offers three choices, and only two of them reach a provider:
 
 | Choice | What happens |
