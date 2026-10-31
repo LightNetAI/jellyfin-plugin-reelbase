@@ -122,6 +122,17 @@ would rather kick it off by hand. Progress and the number of items left are writ
 2. Name the files the usual way, `Artist - Title`, so the artist can be matched.
 3. Refresh the library's metadata, or use **Identify** on an item to pick a record by hand.
 
+The refresh dialog offers three choices, and only two of them reach a provider:
+
+| Choice | What happens |
+| --- | --- |
+| Scan for new and updated files | The default. Jellyfin only looks at items whose file changed, so an item that has already been scanned is left alone and nothing is fetched. |
+| Search for missing metadata | The provider runs and fills the fields that are empty. A name taken from the file name is kept. |
+| Replace all metadata | The provider runs and its answer is applied, so a file named `aaliyah_-_try_again` becomes **Try Again**. Fields the record does not fill keep their existing values. |
+
+To fix names in bulk, use **Replace all metadata** — on the item, on a folder, or on the whole
+library. The nightly task below does the same thing for the whole library on a schedule.
+
 Reelbase matches search terms as a single substring rather than word by word, so the plugin
 searches for the title first (after stripping the `Artist - ` prefix) and the artist second, then
 ranks the results by title, artist and year instead of trusting the API's ordering.

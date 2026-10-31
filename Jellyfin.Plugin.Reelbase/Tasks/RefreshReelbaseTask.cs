@@ -106,8 +106,11 @@ public class RefreshReelbaseTask : IScheduledTask
             ImageRefreshMode = MetadataRefreshMode.FullRefresh,
             IsAutomated = true,
 
-            // Filling gaps, not overwriting: an existing value wins over the provider's.
-            ReplaceAllMetadata = false
+            // The provider's answer wins, the way it does during a library scan. Only the fields
+            // the provider filled are replaced: the merge carries the item's own values into
+            // whatever the provider left empty, so nothing that has no replacement is lost. With
+            // this false the item keeps the name it was scanned with - the file name.
+            ReplaceAllMetadata = true
         };
 
     /// <inheritdoc />

@@ -2,7 +2,7 @@
 name: "Reelbase"
 guid: "816fb33f-67c2-485f-8f47-8c7877ea6e70"
 imageUrl: "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/master/assets/icon.png"
-version: 10
+version: 11
 targetAbi: "12.0.0.0"
 framework: "net10.0"
 owner: "LightNetAI"
@@ -14,4 +14,4 @@ category: "Music"
 artifacts:
   - "Jellyfin.Plugin.Reelbase.dll"
 changelog: |-
-  - Make the nightly refresh actually consult the providers; it was completing without a single lookup.
+  - Apply the provider result the way a library scan does, so a scanned file name is replaced by the record title.

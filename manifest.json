@@ -9,12 +9,12 @@
         "imageUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/assets/icon.png",
         "versions": [
             {
-                "version": "1.5.2.0",
-                "changelog": "Make the nightly refresh actually ask the providers: a whole library was being marked refreshed without a single lookup.",
+                "version": "1.5.3.0",
+                "changelog": "Apply what the provider returns, the way a library scan does, so items stop keeping the name they were scanned with.",
                 "targetAbi": "12.0.0.0",
-                "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.5.2.0.zip",
-                "checksum": "24c33b9474811b9e5aa6851f9fa65c9e",
-                "timestamp": "2026-10-31T06:21:18Z"
+                "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.5.3.0.zip",
+                "checksum": "ab4d977d8c0f7bcec8bf5312424049db",
+                "timestamp": "2026-10-31T06:31:38Z"
             }
         ]
     }

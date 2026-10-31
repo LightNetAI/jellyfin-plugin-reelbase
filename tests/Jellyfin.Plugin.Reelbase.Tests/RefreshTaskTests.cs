@@ -21,11 +21,15 @@ public class RefreshTaskTests
     }
 
     [Fact]
-    public void ARefreshFillsGapsRatherThanOverwritingWhatIsThere()
+    public void ARefreshAppliesWhatTheProviderReturnsLikeAScanDoes()
     {
         var options = RefreshReelbaseTask.CreateRefreshOptions(null!);
 
-        Assert.False(options.ReplaceAllMetadata);
+        // Without this the merge keeps the name the item was scanned with, which is the file name.
+        Assert.True(options.ReplaceAllMetadata);
         Assert.True(options.IsAutomated);
+
+        // Artwork that is already there stays: replacing images is a separate switch.
+        Assert.False(options.ReplaceAllImages);
     }
 }

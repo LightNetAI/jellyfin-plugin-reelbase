@@ -1,14 +1,14 @@
 {
     "category": "Music",
-    "changelog": "Make the nightly refresh actually ask the providers: a whole library was being marked refreshed without a single lookup.",
+    "changelog": "Apply what the provider returns, the way a library scan does, so items stop keeping the name they were scanned with.",
     "description": "Get music video metadata and artwork from a Reelbase instance. Requires a Reelbase API key, which is free to create on any Reelbase site.",
     "guid": "816fb33f-67c2-485f-8f47-8c7877ea6e70",
     "name": "Reelbase",
     "overview": "Get music video metadata and artwork from Reelbase",
     "owner": "LightNetAI",
     "targetAbi": "12.0.0.0",
-    "timestamp": "2026-10-31T06:21:18Z",
-    "version": "1.5.2.0",
+    "timestamp": "2026-10-31T06:31:38Z",
+    "version": "1.5.3.0",
     "status": "Active",
     "autoUpdate": true
 }
