@@ -87,7 +87,7 @@ if (second.Item is { } videoItem)
 
 Console.WriteLine();
 Console.WriteLine("=== allowance, as reported by the API ===");
-Console.WriteLine($"  remaining={limiter.Remaining?.ToString(CultureInfo.InvariantCulture) ?? "(not reported)"} reserved={limiter.Reserved} resets={limiter.ResetsAt?.ToString("u", CultureInfo.InvariantCulture) ?? "-"} hasAllowance={limiter.HasAllowance}");
+Console.WriteLine($"  remaining={limiter.Remaining?.ToString(CultureInfo.InvariantCulture) ?? "(not reported)"} reserved={limiter.Reserved} resets={limiter.ResetsAt?.ToString("u", CultureInfo.InvariantCulture) ?? "-"} paused={limiter.PausedUntil?.ToString("u", CultureInfo.InvariantCulture) ?? "-"} hasAllowance={limiter.HasAllowance}");
 
 return 0;
 

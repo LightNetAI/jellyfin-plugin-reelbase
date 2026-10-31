@@ -37,6 +37,18 @@ public interface IReelbaseRateLimiter
     DateTimeOffset? ResetsAt { get; }
 
     /// <summary>
+    /// Gets when a 429's <c>Retry-After</c> says requests may start again, or <c>null</c> when
+    /// the API has not asked the plugin to wait.
+    /// </summary>
+    DateTimeOffset? PausedUntil { get; }
+
+    /// <summary>
+    /// Gets the longest a request will wait for a pause to pass. A longer one is not waited out:
+    /// the request gives up and the run stops, rather than parking a scan until the window resets.
+    /// </summary>
+    TimeSpan MaximumWait { get; }
+
+    /// <summary>
     /// Marks the start of a run. The next response re-reads the allowance; every response after
     /// that is counted locally rather than re-read.
     /// </summary>

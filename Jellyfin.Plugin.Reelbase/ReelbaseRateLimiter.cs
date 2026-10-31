@@ -42,6 +42,11 @@ public sealed class ReelbaseRateLimiter : IReelbaseRateLimiter
     private static readonly TimeSpan _fallbackRetryDelay = TimeSpan.FromSeconds(60);
 
     /// <summary>
+    /// The longest a request will wait for a pause to pass.
+    /// </summary>
+    private static readonly TimeSpan _maximumWait = TimeSpan.FromSeconds(30);
+
+    /// <summary>
     /// How often the allowance may be written to disk while it is being spent.
     /// </summary>
     private static readonly TimeSpan _saveInterval = TimeSpan.FromSeconds(15);
@@ -75,6 +80,11 @@ public sealed class ReelbaseRateLimiter : IReelbaseRateLimiter
     /// When the window is replenished, when the API reports it.
     /// </summary>
     private DateTimeOffset? _resetsAt;
+
+    /// <summary>
+    /// When a 429's <c>Retry-After</c> says requests may start again.
+    /// </summary>
+    private DateTimeOffset? _pausedUntil;
 
     /// <summary>
     /// Whether the next response should be read, rather than counted locally.
@@ -113,6 +123,7 @@ public sealed class ReelbaseRateLimiter : IReelbaseRateLimiter
             _reportedRemaining = stored.Remaining;
             _limit = stored.Limit;
             _resetsAt = stored.ResetsAt;
+            _pausedUntil = stored.PausedUntil;
 
             // The stored report keeps a restart from believing the allowance is untouched. It is
             // only a fallback: the first response afterwards replaces it with a fresh one.
@@ -170,6 +181,22 @@ public sealed class ReelbaseRateLimiter : IReelbaseRateLimiter
         }
     }
 
+    /// <inheritdoc />
+    public DateTimeOffset? PausedUntil
+    {
+        get
+        {
+            lock (_stateLock)
+            {
+                RollWindowLocked();
+                return _pausedUntil;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public TimeSpan MaximumWait => _maximumWait;
+
     /// <summary>
     /// Gets the allowance left, counting what the plugin itself has spent.
     /// </summary>
@@ -198,27 +225,45 @@ public sealed class ReelbaseRateLimiter : IReelbaseRateLimiter
     /// <inheritdoc />
     public async Task<bool> TryAcquireAsync(CancellationToken cancellationToken)
     {
-        bool allowed;
+        TimeSpan pause;
 
         lock (_stateLock)
         {
             RollWindowLocked();
-            allowed = HasAllowanceLocked;
 
-            if (allowed)
+            var now = DateTimeOffset.UtcNow;
+
+            if (_pausedUntil is { } pausedUntil && pausedUntil > now)
             {
+                // A Retry-After is a promise, not a suggestion: nothing is sent before it passes.
+                pause = pausedUntil - now;
+                if (pause > _maximumWait)
+                {
+                    // Waiting this out would park a scan on a thread until the window resets.
+                    _logger.LogDebug(
+                        "Reelbase asked for a pause until {PausedUntil:u}, which is longer than a request will wait; leaving the rest to the next run.",
+                        pausedUntil);
+                    return false;
+                }
+
                 _spent++;
+            }
+            else if (HasAllowanceLocked)
+            {
+                pause = TimeSpan.Zero;
+                _spent++;
+            }
+            else
+            {
+                LogExhaustion();
+                return false;
             }
         }
 
-        if (!allowed)
-        {
-            LogExhaustion();
-            return false;
-        }
-
         var slot = ReserveSlot();
-        var wait = Stopwatch.GetElapsedTime(Stopwatch.GetTimestamp(), slot);
+        var untilSlot = Stopwatch.GetElapsedTime(Stopwatch.GetTimestamp(), slot);
+        var wait = pause > untilSlot ? pause : untilSlot;
+
         if (wait > TimeSpan.Zero)
         {
             await Task.Delay(wait, cancellationToken).ConfigureAwait(false);
@@ -286,30 +331,31 @@ public sealed class ReelbaseRateLimiter : IReelbaseRateLimiter
     {
         ArgumentNullException.ThrowIfNull(response);
 
-        var delay = response.Headers.RetryAfter?.Delta;
-        if (delay is null && response.Headers.RetryAfter?.Date is { } retryAfterDate)
-        {
-            delay = retryAfterDate - DateTimeOffset.UtcNow;
-        }
-
         var reset = ReadIntHeader(response, "X-RateLimit-Reset");
-        if ((delay is null || delay <= TimeSpan.Zero) && reset > 0)
+        var resetsAt = reset > 0 ? DateTimeOffset.FromUnixTimeSeconds(reset) : (DateTimeOffset?)null;
+
+        // Retry-After is what the API asked for and wins; the reset is only what is left of the
+        // window, which is the same thing when the account is out of requests for the day.
+        var retryDelay = ReadRetryAfter(response)
+            ?? (resetsAt is { } windowEnd ? windowEnd - DateTimeOffset.UtcNow : (TimeSpan?)null)
+            ?? _fallbackRetryDelay;
+
+        if (retryDelay <= TimeSpan.Zero)
         {
-            delay = DateTimeOffset.FromUnixTimeSeconds(reset) - DateTimeOffset.UtcNow;
+            retryDelay = _fallbackRetryDelay;
         }
 
-        var retryDelay = delay is { } value && value > TimeSpan.Zero ? value : _fallbackRetryDelay;
+        var pausedUntil = DateTimeOffset.UtcNow + retryDelay;
 
         lock (_stateLock)
         {
             // Being refused proves the local count has drifted, so the next response re-reads.
-            _reportedRemaining = 0;
-            _spent = 0;
+            _pausedUntil = pausedUntil;
             _needsReport = true;
 
-            if (reset > 0)
+            if (resetsAt is { } resetsAtValue)
             {
-                _resetsAt = DateTimeOffset.FromUnixTimeSeconds(reset);
+                _resetsAt = resetsAtValue;
             }
         }
 
@@ -319,8 +365,9 @@ public sealed class ReelbaseRateLimiter : IReelbaseRateLimiter
         SaveIfDue(force: true);
 
         _logger.LogWarning(
-            "The Reelbase API rate limited the plugin; holding requests for {Delay}.",
-            retryDelay);
+            "The Reelbase API rate limited the plugin and asked for {Delay}, until {PausedUntil:u}; lookups wait for it.",
+            retryDelay,
+            pausedUntil);
 
         return retryDelay;
     }
@@ -379,6 +426,7 @@ public sealed class ReelbaseRateLimiter : IReelbaseRateLimiter
         _reportedRemaining = _limit;
         _spent = 0;
         _resetsAt = null;
+        _pausedUntil = null;
         _needsReport = true;
         _exhaustionLogged = false;
     }
@@ -389,7 +437,7 @@ public sealed class ReelbaseRateLimiter : IReelbaseRateLimiter
 
         lock (_stateLock)
         {
-            if (_reportedRemaining is not { } remaining || _resetsAt is not { } resetsAt)
+            if (_reportedRemaining is null && _resetsAt is null && _pausedUntil is null)
             {
                 return;
             }
@@ -400,7 +448,7 @@ public sealed class ReelbaseRateLimiter : IReelbaseRateLimiter
             }
 
             _lastSaved = DateTimeOffset.UtcNow;
-            allowance = new ReelbaseAllowance(remaining, _limit, resetsAt);
+            allowance = new ReelbaseAllowance(_reportedRemaining, _limit, _resetsAt, _pausedUntil);
         }
 
         _store.Save(allowance);
@@ -427,6 +475,26 @@ public sealed class ReelbaseRateLimiter : IReelbaseRateLimiter
             "The Reelbase allowance is down to the {Reserved} requests this plugin leaves for everything else on the account, so metadata lookups pause until {Reset:u}. The allowance is per account and is shared by everything using the key.",
             reserved,
             resetsAt);
+    }
+
+    /// <summary>
+    /// Reads <c>Retry-After</c>, which RFC 9110 allows to be either a number of seconds or a
+    /// date. Anything unreadable is left for the caller to fall back on.
+    /// </summary>
+    private static TimeSpan? ReadRetryAfter(HttpResponseMessage response)
+    {
+        var retryAfter = response.Headers.RetryAfter;
+        if (retryAfter is null)
+        {
+            return null;
+        }
+
+        if (retryAfter.Delta is { } delta)
+        {
+            return delta;
+        }
+
+        return retryAfter.Date is { } date ? date - DateTimeOffset.UtcNow : null;
     }
 
     private static int ReadIntHeader(HttpResponseMessage response, string name)

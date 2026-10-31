@@ -38,7 +38,8 @@
                             and stops at 95% of the figure, which leaves the rest of the account room to work. A nightly
                             task named <b>Refresh music video metadata from Reelbase</b> works through the library and
                             carries on where it stopped on the following run, which is what lets a library larger than
-                            one day's allowance finish over several days.
+                            one day's allowance finish over several days. If the API refuses a request and says how
+                            long to wait, the plugin waits that long, or stops until then when the wait is long.
                         </p>
                     </div>
                     <div class="inputContainer">

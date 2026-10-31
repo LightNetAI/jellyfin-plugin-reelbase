@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -129,18 +130,88 @@ public class RateLimiterTests
     }
 
     [Fact]
-    public async Task RateLimitingSpendsTheAllowance_AndForcesAFreshReport()
+    public async Task ALongRetryAfter_StopsTheRequestsInsteadOfWaiting()
     {
         var limiter = CreateLimiter();
 
-        var delay = limiter.ObserveRateLimited(Response(("Retry-After", "5")));
+        var delay = limiter.ObserveRateLimited(Response(("Retry-After", "3600")));
 
-        Assert.Equal(TimeSpan.FromSeconds(5), delay);
-        Assert.Equal(0, limiter.Remaining);
+        Assert.Equal(TimeSpan.FromHours(1), delay);
+        Assert.NotNull(limiter.PausedUntil);
+
+        // An hour is longer than a request is willing to wait, so it gives up rather than park.
         Assert.False(await limiter.TryAcquireAsync(default));
+    }
 
-        limiter.Observe(Response(("X-RateLimit-Limit", "1000"), ("X-RateLimit-Remaining", "900"), ("X-RateLimit-Reset", Reset(TimeSpan.FromHours(1)))));
-        Assert.Equal(900, limiter.Remaining);
+    [Fact]
+    public async Task AShortRetryAfter_IsWaitedOut()
+    {
+        var limiter = CreateLimiter();
+        limiter.ObserveRateLimited(Response(("Retry-After", "1")));
+
+        var started = DateTimeOffset.UtcNow;
+
+        Assert.True(await limiter.TryAcquireAsync(default));
+        Assert.True(DateTimeOffset.UtcNow - started >= TimeSpan.FromSeconds(1));
+    }
+
+    [Fact]
+    public void RetryAfterMayBeADateInsteadOfSeconds()
+    {
+        var limiter = CreateLimiter();
+        var at = DateTimeOffset.UtcNow.AddMinutes(5);
+        using var response = new HttpResponseMessage(HttpStatusCode.TooManyRequests);
+        response.Headers.RetryAfter = new RetryConditionHeaderValue(at);
+
+        limiter.ObserveRateLimited(response);
+
+        Assert.InRange(limiter.PausedUntil!.Value, at.AddSeconds(-2), at.AddSeconds(2));
+    }
+
+    [Fact]
+    public void WithoutRetryAfter_TheResetIsUsed()
+    {
+        var limiter = CreateLimiter();
+
+        limiter.ObserveRateLimited(Response(("X-RateLimit-Reset", Reset(TimeSpan.FromMinutes(10)))));
+
+        Assert.InRange(
+            limiter.PausedUntil!.Value,
+            DateTimeOffset.UtcNow.AddMinutes(9),
+            DateTimeOffset.UtcNow.AddMinutes(11));
+    }
+
+    [Fact]
+    public void ARateLimitThatSaysNothingAtAll_FallsBackToAShortPause()
+    {
+        var limiter = CreateLimiter();
+
+        Assert.Equal(TimeSpan.FromSeconds(60), limiter.ObserveRateLimited(Response()));
+    }
+
+    [Fact]
+    public void ThePauseSurvivesARestart()
+    {
+        var store = new MemoryStore();
+        var before = new ReelbaseRateLimiter(NullLogger<ReelbaseRateLimiter>.Instance, store, TimeSpan.Zero);
+        before.ObserveRateLimited(Response(("Retry-After", "1800")));
+
+        var after = new ReelbaseRateLimiter(NullLogger<ReelbaseRateLimiter>.Instance, store, TimeSpan.Zero);
+
+        Assert.NotNull(after.PausedUntil);
+        Assert.False(after.TryAcquireAsync(default).GetAwaiter().GetResult());
+    }
+
+    [Fact]
+    public void ANwWindowClearsThePause()
+    {
+        var limiter = CreateLimiter();
+
+        limiter.ObserveRateLimited(Response(("X-RateLimit-Reset", Reset(TimeSpan.FromHours(-1)))));
+
+        // The window the pause belonged to has passed, so the pause goes with it.
+        Assert.Null(limiter.PausedUntil);
+        Assert.True(limiter.HasAllowance);
     }
 
     [Fact]

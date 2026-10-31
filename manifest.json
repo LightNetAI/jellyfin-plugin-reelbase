@@ -9,12 +9,12 @@
         "imageUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/assets/icon.png",
         "versions": [
             {
-                "version": "1.4.0.1",
-                "changelog": "Read from https://api.reelbase.me.",
+                "version": "1.5.0.0",
+                "changelog": "Honour the Retry-After the API now returns on a 429: wait when it is brief, stop until then when it is not, and remember the wait across restarts.",
                 "targetAbi": "12.0.0.0",
-                "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.4.0.1.zip",
-                "checksum": "f23f904cc1a5fe6774db581bf8704991",
-                "timestamp": "2026-10-31T02:08:41Z"
+                "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.5.0.0.zip",
+                "checksum": "847242f3dfb242a7c5192feb61e11455",
+                "timestamp": "2026-10-31T03:14:11Z"
             }
         ]
     }

@@ -38,9 +38,24 @@ public sealed class FileReelbaseAllowanceStore : IReelbaseAllowanceStore
             }
 
             var allowance = JsonSerializer.Deserialize<ReelbaseAllowance>(File.ReadAllText(_path));
+            if (allowance is null)
+            {
+                return null;
+            }
 
             // A stored window that has already rolled over says nothing about the next one.
-            return allowance is not null && allowance.ResetsAt > DateTimeOffset.UtcNow ? allowance : null;
+            if (allowance.ResetsAt is { } resetsAt && resetsAt <= DateTimeOffset.UtcNow)
+            {
+                return null;
+            }
+
+            // A pause that has already run out is not worth carrying.
+            if (allowance.PausedUntil is { } paused && paused <= DateTimeOffset.UtcNow)
+            {
+                return allowance with { PausedUntil = null };
+            }
+
+            return allowance;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
         {

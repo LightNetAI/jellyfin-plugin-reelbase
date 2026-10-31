@@ -99,6 +99,15 @@ public class RefreshReelbaseTask : IScheduledTask
         // One fresh report for the run; the limiter counts the requests itself from there.
         _rateLimiter.BeginRun();
 
+        // A pause can outlive the process that was told about it, so the run starts by honouring it.
+        if (_rateLimiter.PausedUntil is { } pausedUntil && pausedUntil > DateTimeOffset.UtcNow)
+        {
+            _logger.LogInformation(
+                "Reelbase asked for a pause until {PausedUntil:u}, so the refresh waits for the next run.",
+                pausedUntil);
+            return;
+        }
+
         var items = ReelbaseRefreshOrder.OldestFirst(
             _libraryManager.GetItemList(new InternalItemsQuery
             {
@@ -128,7 +137,8 @@ public class RefreshReelbaseTask : IScheduledTask
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (!_rateLimiter.HasAllowance)
+            if (!_rateLimiter.HasAllowance
+                || (_rateLimiter.PausedUntil is { } pauseUntil && pauseUntil > DateTimeOffset.UtcNow))
             {
                 break;
             }
@@ -146,6 +156,16 @@ public class RefreshReelbaseTask : IScheduledTask
             }
 
             progress?.Report(100.0 * (index + 1) / items.Count);
+
+            if (_rateLimiter.PausedUntil is { } pauseAfterItem && pauseAfterItem > DateTimeOffset.UtcNow)
+            {
+                _logger.LogWarning(
+                    "Reelbase asked for a pause until {PausedUntil:u}, so the refresh stopped after {Refreshed} of {Total} music videos.",
+                    pauseAfterItem,
+                    refreshed,
+                    items.Count);
+                return;
+            }
 
             if (!ReelbaseAvailability.IsAvailable)
             {

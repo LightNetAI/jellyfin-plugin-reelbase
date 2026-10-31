@@ -96,7 +96,10 @@ On top of that:
 - every response is cached, for 24 hours by default, so a rescan inside a day costs nothing;
 - when the allowance is spent, lookups stop for the rest of the day with one warning in the log
   instead of failing the scan or hammering the API;
-- requests are spaced out, and an HTTP 429 is waited out when the retry is short enough;
+- requests are spaced out, and an HTTP 429 is taken at its word: the plugin stops until the
+  `Retry-After` it returns, waits it out inline when that is brief, and otherwise gives up the
+  run rather than parking a scan until the window resets. The wait is remembered across a
+  restart, so restarting Jellyfin does not spend another request rediscovering the refusal;
 - if Reelbase stops answering - a 5xx, a refused key, a connection that never completes - ten
   failures in a row pause the lookups for two minutes instead of asking once per library item,
   and a nightly run gives up rather than grinding through thousands of failures.

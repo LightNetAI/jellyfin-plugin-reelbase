@@ -54,12 +54,6 @@ public class ReelbaseClient : IReelbaseClient
     /// </summary>
     private static readonly TimeSpan _notFoundCacheDuration = TimeSpan.FromHours(1);
 
-    /// <summary>
-    /// How long a caller will wait out a rate limit before giving up on the request. The daily
-    /// allowance resets at midnight, which is far too long to hold a scan open for.
-    /// </summary>
-    private static readonly TimeSpan _maximumRetryDelay = TimeSpan.FromMinutes(2);
-
     private static readonly JsonSerializerOptions _jsonSerializerOptions = JsonDefaults.Options;
 
     /// <summary>
@@ -310,14 +304,15 @@ public class ReelbaseClient : IReelbaseClient
 
                     var retryDelay = _rateLimiter.ObserveRateLimited(response);
 
-                    // The daily allowance does not come back until it resets, which is far too
-                    // long to keep a scan waiting, so the request is abandoned instead.
-                    if (retryDelay > _maximumRetryDelay || rateLimitRetries++ >= 1)
+                    // The limiter now holds every caller for that delay: a short Retry-After is
+                    // waited out in TryAcquireAsync, and a long one ends the attempt instead of
+                    // parking a scan until the window resets. One retry tells the two apart.
+                    if (rateLimitRetries++ >= 1)
                     {
                         return (default, TimeSpan.Zero);
                     }
 
-                    await Task.Delay(retryDelay, cancellationToken).ConfigureAwait(false);
+                    _logger.LogDebug("Reelbase asked for {Delay}; asking for {Path} once more.", retryDelay, path);
                     continue;
                 }
 
