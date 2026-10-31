@@ -1,0 +1,25 @@
+{
+    "data": {
+        "name": "Annette Milburn",
+        "slug": "annette-milburn",
+        "bio": null,
+        "website": null,
+        "image_url": null,
+        "url": "/person/annette-milburn",
+        "credits": [
+            {
+                "role": "Director",
+                "video": {
+                    "title": "Suntanning (for Blacks)",
+                    "slug": "suntanning-for-blacks",
+                    "year": 2026,
+                    "artist": {
+                        "name": "Zwonaka",
+                        "slug": "zwonaka"
+                    },
+                    "url": "/video/suntanning-for-blacks"
+                }
+            }
+        ]
+    }
+}

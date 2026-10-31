@@ -1,0 +1,72 @@
+{
+    "data": {
+        "title": "Miss Misunderstood",
+        "slug": "miss-misunderstood",
+        "artist": {
+            "name": "Zolita",
+            "slug": "zolita"
+        },
+        "director": {
+            "name": "Zolita",
+            "slug": "zolita"
+        },
+        "year": 2026,
+        "release_date": "2026-09-11",
+        "duration_seconds": null,
+        "description": null,
+        "youtube_id": "JTc5shKm4gA",
+        "vimeo_id": null,
+        "country": null,
+        "label": null,
+        "production_company": null,
+        "source_name": "IMVDb",
+        "source_url": "https://imvdb.com/video/zolita/miss-misunderstood",
+        "views": 0,
+        "url": "/video/miss-misunderstood",
+        "artwork_url": "/uploads/artwork/2026/10/94c5b5f6892b6d71d6cd6a9976e31cfc.jpg",
+        "credits": [
+            {
+                "role": "Director",
+                "person": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                }
+            },
+            {
+                "role": "Director",
+                "person": {
+                    "name": "Tatiana Ringsby",
+                    "slug": "tatiana-ringsby"
+                }
+            },
+            {
+                "role": "Director of Photography",
+                "person": {
+                    "name": "Savannah Bloch",
+                    "slug": "savannah-bloch"
+                }
+            },
+            {
+                "role": "Director of Photography",
+                "person": {
+                    "name": "Allen Chodakowski",
+                    "slug": "allen-chodakowski"
+                }
+            }
+        ],
+        "genres": [
+            {
+                "name": "Alternative",
+                "slug": "alternative"
+            },
+            {
+                "name": "Indie Rock",
+                "slug": "indie-rock"
+            },
+            {
+                "name": "Pop",
+                "slug": "pop"
+            }
+        ]
+    }
+}

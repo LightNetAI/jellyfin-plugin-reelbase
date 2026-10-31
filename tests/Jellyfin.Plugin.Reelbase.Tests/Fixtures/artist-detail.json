@@ -1,0 +1,223 @@
+{
+    "data": {
+        "name": "Zolita",
+        "slug": "zolita",
+        "bio": null,
+        "country": null,
+        "formed_year": null,
+        "url": "/artist/zolita",
+        "videos": [
+            {
+                "title": "Miss Misunderstood",
+                "slug": "miss-misunderstood",
+                "artist": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "director": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "year": 2026,
+                "release_date": "2026-09-11",
+                "duration_seconds": null,
+                "description": null,
+                "youtube_id": "JTc5shKm4gA",
+                "vimeo_id": null,
+                "country": null,
+                "label": null,
+                "production_company": null,
+                "source_name": "IMVDb",
+                "source_url": "https://imvdb.com/video/zolita/miss-misunderstood",
+                "views": 0,
+                "url": "/video/miss-misunderstood",
+                "artwork_url": "/uploads/artwork/2026/10/94c5b5f6892b6d71d6cd6a9976e31cfc.jpg"
+            },
+            {
+                "title": "Hypocrite",
+                "slug": "hypocrite-2",
+                "artist": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "director": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "year": 2025,
+                "release_date": "2025-03-26",
+                "duration_seconds": null,
+                "description": null,
+                "youtube_id": "ECzUUh8HqaM",
+                "vimeo_id": null,
+                "country": null,
+                "label": null,
+                "production_company": null,
+                "source_name": "IMVDb",
+                "source_url": "https://imvdb.com/video/zolita/hypocrite",
+                "views": 0,
+                "url": "/video/hypocrite-2",
+                "artwork_url": "/uploads/artwork/2026/10/02491ef469a18ce20df5881465933006.jpg"
+            },
+            {
+                "title": "I F*cking Love You",
+                "slug": "i-f-cking-love-you",
+                "artist": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "director": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "year": 2022,
+                "release_date": "2022-04-27",
+                "duration_seconds": null,
+                "description": null,
+                "youtube_id": "ptHY0sKWyLw",
+                "vimeo_id": null,
+                "country": null,
+                "label": null,
+                "production_company": null,
+                "source_name": "IMVDb",
+                "source_url": "https://imvdb.com/video/zolita/i-fcking-love-you",
+                "views": 0,
+                "url": "/video/i-f-cking-love-you",
+                "artwork_url": "/uploads/artwork/2026/10/a9fc1652462f08abc4dfa0c353230051.jpg"
+            },
+            {
+                "title": "Bedspell",
+                "slug": "bedspell",
+                "artist": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "director": null,
+                "year": 2020,
+                "release_date": "2020-11-20",
+                "duration_seconds": null,
+                "description": null,
+                "youtube_id": "ESptbxp6SU8",
+                "vimeo_id": null,
+                "country": null,
+                "label": null,
+                "production_company": null,
+                "source_name": "IMVDb",
+                "source_url": "https://imvdb.com/video/zolita/bedspell",
+                "views": 0,
+                "url": "/video/bedspell",
+                "artwork_url": "/uploads/artwork/2026/10/a031b3efd04189836942e31d684662b4.jpg"
+            },
+            {
+                "title": "Oblivion",
+                "slug": "oblivion-10",
+                "artist": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "director": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "year": 2020,
+                "release_date": "2020-08-07",
+                "duration_seconds": null,
+                "description": null,
+                "youtube_id": "QydQv7NbWcs",
+                "vimeo_id": null,
+                "country": null,
+                "label": null,
+                "production_company": null,
+                "source_name": "IMVDb",
+                "source_url": "https://imvdb.com/video/zolita/oblivion",
+                "views": 0,
+                "url": "/video/oblivion-10",
+                "artwork_url": "/uploads/artwork/2026/10/871a7572c810de64bea8d46833f72dcc.jpg"
+            },
+            {
+                "title": "Come Home With Me",
+                "slug": "come-home-with-me",
+                "artist": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "director": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "year": 2018,
+                "release_date": "2018-05-23",
+                "duration_seconds": null,
+                "description": null,
+                "youtube_id": "OXZgr-a-36w",
+                "vimeo_id": null,
+                "country": null,
+                "label": "Tuxedo Media Group",
+                "production_company": "Sluts and Scholars",
+                "source_name": "IMVDb",
+                "source_url": "https://imvdb.com/video/zolita/come-home-with-me",
+                "views": 0,
+                "url": "/video/come-home-with-me",
+                "artwork_url": "/uploads/artwork/2026/10/f3c2fd9016b69a22d1a59eba0dc4d412.jpg"
+            },
+            {
+                "title": "Fight Like a Girl",
+                "slug": "fight-like-a-girl-2",
+                "artist": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "director": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "year": 2017,
+                "release_date": "2017-08-04",
+                "duration_seconds": null,
+                "description": null,
+                "youtube_id": "WWcvcfpqs08",
+                "vimeo_id": null,
+                "country": null,
+                "label": null,
+                "production_company": null,
+                "source_name": "IMVDb",
+                "source_url": "https://imvdb.com/video/zolita/fight-like-a-girl",
+                "views": 0,
+                "url": "/video/fight-like-a-girl-2",
+                "artwork_url": "/uploads/artwork/2026/10/16efb1c45c096090a13475a7f2b36e4c.jpg"
+            },
+            {
+                "title": "Holy",
+                "slug": "holy-4",
+                "artist": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "director": {
+                    "name": "Zolita",
+                    "slug": "zolita"
+                },
+                "year": 2016,
+                "release_date": "2016-06-21",
+                "duration_seconds": null,
+                "description": null,
+                "youtube_id": "hdYiYjuf0ko",
+                "vimeo_id": null,
+                "country": null,
+                "label": null,
+                "production_company": null,
+                "source_name": "IMVDb",
+                "source_url": "https://imvdb.com/video/zolita/holy",
+                "views": 0,
+                "url": "/video/holy-4",
+                "artwork_url": "/uploads/artwork/2026/10/80eecefb8f1842858a11cc87b32dda90.jpg"
+            }
+        ],
+        "meta": {
+            "page": 1,
+            "per_page": 24,
+            "total": 8,
+            "last_page": 1
+        }
+    }
+}

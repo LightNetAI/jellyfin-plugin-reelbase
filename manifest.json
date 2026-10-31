@@ -1,0 +1,21 @@
+[
+    {
+        "guid": "816fb33f-67c2-485f-8f47-8c7877ea6e70",
+        "name": "Reelbase",
+        "description": "Get music video metadata and artwork from a Reelbase instance. Requires a Reelbase API key, which is free to create on any Reelbase site.",
+        "overview": "Get music video metadata and artwork from Reelbase",
+        "owner": "LightNetAI",
+        "category": "Music",
+        "imageUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/assets/icon.png",
+        "versions": [
+            {
+                "version": "1.4.0.1",
+                "changelog": "Read from https://api.reelbase.me.",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.4.0.1.zip",
+                "checksum": "f23f904cc1a5fe6774db581bf8704991",
+                "timestamp": "2026-10-31T02:08:41Z"
+            }
+        ]
+    }
+]

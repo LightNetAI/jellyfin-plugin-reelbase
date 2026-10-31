@@ -1,0 +1,6 @@
+{
+    "error": {
+        "status": 401,
+        "message": "A valid API key is required."
+    }
+}

@@ -1,0 +1,17 @@
+---
+name: "Reelbase"
+guid: "816fb33f-67c2-485f-8f47-8c7877ea6e70"
+imageUrl: "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/master/assets/icon.png"
+version: 7
+targetAbi: "12.0.0.0"
+framework: "net10.0"
+owner: "LightNetAI"
+overview: "Get music video metadata and artwork from Reelbase"
+description: >
+  Get music video metadata and artwork from a Reelbase instance. Requires a
+  Reelbase API key, which is free to create on any Reelbase site.
+category: "Music"
+artifacts:
+  - "Jellyfin.Plugin.Reelbase.dll"
+changelog: |-
+  - Read from https://api.reelbase.me.
