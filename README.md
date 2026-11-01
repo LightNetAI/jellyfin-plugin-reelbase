@@ -41,10 +41,6 @@ https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/manif
 Save, then open the **Catalog** tab, find **Reelbase** under *Music* and install it. Restart
 Jellyfin when it asks.
 
-The address has to serve the JSON file itself. The page you land on when you browse to the file
-on github.com - `.../blob/main/manifest.json` - is HTML, and Jellyfin fails with
-`'<' is an invalid start of a value` when it tries to read it.
-
 The compiled plugin is committed in [dist](dist), so the repository works on its own: the
 manifest points at the packaged zip next to it, not at a build server.
 
