@@ -353,7 +353,10 @@ public class ReelbaseClient : IReelbaseClient
                         .ReadFromJsonAsync<T>(_jsonSerializerOptions, cancellationToken)
                         .ConfigureAwait(false);
 
-                    return (result, GetCacheDuration(settings));
+                    // An empty page is a real answer, but not a lasting one: the catalogue grows,
+                    // and a miss remembered for a day is a lookup that never reaches the API
+                    // again - which looks exactly like the plugin not sending anything.
+                    return (result, HasPayload(result) ? GetCacheDuration(settings) : TimeSpan.Zero);
                 }
                 catch (JsonException ex)
                 {
@@ -386,6 +389,23 @@ public class ReelbaseClient : IReelbaseClient
 
         return response.ReasonPhrase ?? string.Empty;
     }
+
+    /// <summary>
+    /// Whether a response carries something worth remembering.
+    /// </summary>
+    /// <param name="result">The deserialized response.</param>
+    /// <returns><c>true</c> when the response holds a record or a page of them.</returns>
+    private static bool HasPayload<T>(T? result)
+        where T : class
+        => result switch
+        {
+            ReelbaseListResponse<ReelbaseVideo> list => list.Data.Count > 0,
+            ReelbaseListResponse<ReelbaseArtist> list => list.Data.Count > 0,
+            ReelbaseItemResponse<ReelbaseVideo> item => item.Data is not null,
+            ReelbaseItemResponse<ReelbaseArtist> item => item.Data is not null,
+            ReelbaseItemResponse<ReelbasePerson> item => item.Data is not null,
+            _ => result is not null
+        };
 
     /// <summary>
     /// How long a good response may be reused for.

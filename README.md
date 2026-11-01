@@ -87,7 +87,9 @@ allowance is untouched.
 
 On top of that:
 
-- every response is cached, for 24 hours by default, so a rescan inside a day costs nothing;
+- a response that carries records is cached, for 24 hours by default, so a rescan inside a day
+  costs nothing; a lookup that found nothing is asked again, so a record added to Reelbase is
+  picked up on the next try instead of the next day;
 - when the allowance is spent, lookups stop for the rest of the day with one warning in the log
   instead of failing the scan or hammering the API;
 - requests are spaced out, and an HTTP 429 is taken at its word: the plugin stops until the

@@ -9,12 +9,12 @@
     "imageUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/assets/icon.png",
     "versions": [
       {
-        "version": "1.5.6.0",
-        "changelog": "Find titles that carry a quote, such as Freedom `90 or What I`ve Done, by asking for the whole Artist - Title name first.",
+        "version": "1.5.7.0",
+        "changelog": "Ask again when a lookup finds nothing, so a record added to Reelbase is found on the next run instead of the next day.",
         "targetAbi": "12.0.0.0",
-        "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.5.6.0.zip",
-        "checksum": "47011fb8c1e5bd477f5f6a4e3e4cbeda",
-        "timestamp": "2026-10-31T13:24:01Z"
+        "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.5.7.0.zip",
+        "checksum": "1d5671d32ef58eae69660af87001f7b7",
+        "timestamp": "2026-11-01T03:18:13Z"
       }
     ]
   }

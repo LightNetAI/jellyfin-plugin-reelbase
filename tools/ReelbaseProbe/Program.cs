@@ -107,6 +107,24 @@ foreach (var name in quoteCases)
     Console.WriteLine($"  {name}  ->  {hits.Count} hit(s) {string.Join(" ; ", hits.Take(2).Select(h => h.Name + " | " + (h.AlbumArtist?.Name ?? "-")))}");
 }
 
+Console.WriteLine();
+Console.WriteLine("=== accents and ampersands ===");
+foreach (var accented in new[]
+{
+    "Domingo, Netrebko & Villazón - Dein Ist Mein Ganzes Herz",
+    "Björk - Jóga",
+})
+{
+    var queries = ReelbaseSearchQueries.ForMusicVideo(accented, null);
+    Console.WriteLine($"  {accented}");
+    Console.WriteLine($"    queries: {string.Join(" ; ", queries)}");
+    foreach (var accentedQuery in queries)
+    {
+        var accentedHits = await client.SearchVideosAsync(accentedQuery, CancellationToken.None).ConfigureAwait(false);
+        Console.WriteLine($"    \"{accentedQuery}\" -> {accentedHits.Count} hit(s) {string.Join(" ; ", accentedHits.Take(2).Select(h => h.Title + " | " + (h.Artist?.Name ?? "-")))}");
+    }
+}
+
 var quotedMetadata = await videoProvider.GetMetadata(new MusicVideoInfo { Name = "George Michael - Freedom `90" }, CancellationToken.None);
 Console.WriteLine($"  metadata: {quotedMetadata.Item?.Name} | {quotedMetadata.Item?.Artists?.FirstOrDefault() ?? "-"} | {quotedMetadata.Item?.ProductionYear}");
 
@@ -125,12 +143,16 @@ Console.WriteLine($"  Overview={Trim(personResult.Item?.Overview, 100)}");
 Console.WriteLine();
 Console.WriteLine("=== image provider ===");
 var imageProvider = new ReelbaseImageProvider(httpClientFactory, client);
-if (second.Item is { } videoItem)
+foreach (var (label, source) in new[] { ("second", second.Item), ("quoted", quotedMetadata.Item) })
 {
-    foreach (var image in await imageProvider.GetImages(videoItem, CancellationToken.None))
+    if (source is not { } videoItem)
     {
-        Console.WriteLine($"  {image.Type} {image.ProviderName} {image.Url}");
+        Console.WriteLine($"  {label}: no item");
+        continue;
     }
+
+    var images = (await imageProvider.GetImages(videoItem, CancellationToken.None).ConfigureAwait(false)).ToList();
+    Console.WriteLine($"  {label}: id={videoItem.ProviderIds.GetValueOrDefault("Reelbase") ?? "-"} images={images.Count} {string.Join(" ; ", images.Select(i => i.Url))}");
 }
 
 Console.WriteLine();
