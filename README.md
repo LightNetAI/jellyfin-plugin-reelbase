@@ -71,8 +71,7 @@ to the default above.
 
 A Reelbase account gets a fixed number of API requests per UTC day, shared by every key on the
 account, and a full metadata refresh spends about two requests per video (one search, one detail
-lookup). On a 2,000 request day that is roughly 1000 videos on a fresh cache, or 475 once the
-plugin's reserve below is taken into account.
+lookup). On a 2,000 request day that is roughly 1000 videos on a fresh cache
 
 **The plugin has no hard-coded limit and no setting for one.** It reads `X-RateLimit-Limit`,
 `X-RateLimit-Remaining` and `X-RateLimit-Reset` **once, at the start of each run**, and keeps its
