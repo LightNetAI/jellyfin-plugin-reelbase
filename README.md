@@ -77,8 +77,7 @@ lookup). On a 2,000 request day that is roughly 1000 videos on a fresh cache
 `X-RateLimit-Remaining` and `X-RateLimit-Reset` **once, at the start of each run**, and keeps its
 own count from there. Reading them on every response would keep overwriting the count with a
 figure that also moves whenever the account is used elsewhere; counting locally makes the
-plugin's own spending the only thing it tracks. A 429 is the exception: it proves the count has
-drifted, so the limiter takes a fresh report from that response and stops.
+plugin's own spending the only thing it tracks.
 
 **It only spends 95% of the allowance.** The last 5% is left alone deliberately: on a 2,000
 request day the plugin stops at 1950, so there is always room for new content, for a manual
