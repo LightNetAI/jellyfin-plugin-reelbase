@@ -80,8 +80,8 @@ figure that also moves whenever the account is used elsewhere; counting locally 
 plugin's own spending the only thing it tracks. A 429 is the exception: it proves the count has
 drifted, so the limiter takes a fresh report from that response and stops.
 
-**It only spends 95% of the allowance.** The last 5% is left alone deliberately: on a 1,000
-request day the plugin stops at 950, so there is always room for new content, for a manual
+**It only spends 95% of the allowance.** The last 5% is left alone deliberately: on a 2,000
+request day the plugin stops at 1950, so there is always room for new content, for a manual
 lookup, or for anything else on the same key while a library refresh is grinding through the
 backlog. The figure last reported is kept on disk, so restarting Jellyfin does not believe the
 allowance is untouched.
