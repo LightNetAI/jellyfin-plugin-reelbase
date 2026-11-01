@@ -9,12 +9,12 @@
     "imageUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/assets/icon.png",
     "versions": [
       {
-        "version": "1.5.7.0",
-        "changelog": "Ask again when a lookup finds nothing, so a record added to Reelbase is found on the next run instead of the next day.",
+        "version": "1.6.0.0",
+        "changelog": "Send the item as the file names it, one query for the whole name, and let the server decide whether the catalogue holds it.",
         "targetAbi": "12.0.0.0",
-        "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.5.7.0.zip",
-        "checksum": "1d5671d32ef58eae69660af87001f7b7",
-        "timestamp": "2026-11-01T03:18:13Z"
+        "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.6.0.0.zip",
+        "checksum": "16fffb819d8ac6b49784c46f5b806f84",
+        "timestamp": "2026-11-01T04:01:51Z"
       }
     ]
   }

@@ -19,56 +19,46 @@ public class SearchTests
         => Assert.Equal(expected, ReelbaseSearchQueries.StripArtistPrefix(name, artist));
 
     [Fact]
-    public void ForMusicVideo_SearchesTheTitleBeforeTheArtist()
+    public void ForMusicVideo_SendsTheNameAsTheFileHasIt()
     {
-        var queries = ReelbaseSearchQueries.ForMusicVideo("Zolita - Miss Misunderstood", new[] { "Zolita" });
+        // The item is submitted as it is and the server works out whether the catalogue holds
+        // it: the "Artist - Title" form is the one the API forgives punctuation for, so the
+        // name is not split up here and the artist is not asked for on its own.
+        var queries = ReelbaseSearchQueries.ForMusicVideo("Zolita - Miss Misunderstood");
 
-        Assert.Equal(new[] { "Miss Misunderstood", "Zolita" }, queries);
+        Assert.Equal(new[] { "Zolita - Miss Misunderstood" }, queries);
     }
 
     [Fact]
-    public void ForMusicVideo_SearchesTheHalvesOfAFileNameThatKeepsItsUnderscores()
+    public void ForMusicVideo_TurnsUnderscoresIntoSpaces()
     {
         // Jellyfin hands over the file name untouched: this is the real name it produces for
         // aaliyah_-_try_again.avi, and no record is spelled that way.
-        var queries = ReelbaseSearchQueries.ForMusicVideo("aaliyah_-_try_again", null);
+        var queries = ReelbaseSearchQueries.ForMusicVideo("aaliyah_-_try_again");
 
-        Assert.Equal(new[] { "try again", "aaliyah" }, queries);
+        Assert.Equal(new[] { "aaliyah - try again" }, queries);
     }
 
     [Fact]
-    public void ForMusicVideo_UsesTheKnownArtistWhenTheNameKeepsItsUnderscores()
+    public void ForMusicVideo_LeavesAQuotedNameAlone()
     {
-        var queries = ReelbaseSearchQueries.ForMusicVideo("aaliyah_-_try_again", new[] { "Aaliyah" });
+        var queries = ReelbaseSearchQueries.ForMusicVideo("George Michael - Freedom `90");
 
-        Assert.Equal(new[] { "try again", "Aaliyah" }, queries);
+        Assert.Equal(new[] { "George Michael - Freedom `90" }, queries);
     }
 
     [Fact]
-    public void ForMusicVideo_AsksForTheNameAsWrittenWhenTheTitleHasAQuote()
+    public void ForMusicVideo_DropsTheFileExtension()
     {
-        // The bare title is matched literally, so "freedom `90" finds nothing at all; the
-        // "Artist - Title" form is matched with the punctuation forgiven and finds the record.
-        var queries = ReelbaseSearchQueries.ForMusicVideo("George Michael - Freedom `90", null);
+        var queries = ReelbaseSearchQueries.ForMusicVideo(
+            "Domingo, Netrebko & Villazón - Dein Ist Mein Ganzes Herz.mkv");
 
-        Assert.Equal(new[] { "George Michael - Freedom `90", "Freedom `90", "George Michael" }, queries);
+        Assert.Equal(new[] { "Domingo, Netrebko & Villazón - Dein Ist Mein Ganzes Herz" }, queries);
     }
 
     [Fact]
-    public void ForMusicVideo_AsksForTheNameAsWrittenWhenTheArtistIsKnownAndTheTitleHasAnApostrophe()
-    {
-        var queries = ReelbaseSearchQueries.ForMusicVideo("Linkin Park - What I've Done", new[] { "Linkin Park" });
-
-        Assert.Equal(new[] { "Linkin Park - What I've Done", "What I've Done", "Linkin Park" }, queries);
-    }
-
-    [Fact]
-    public void ForMusicVideo_LeavesAQuoteFreeNameAlone()
-    {
-        var queries = ReelbaseSearchQueries.ForMusicVideo("aaliyah_-_try_again", null);
-
-        Assert.Equal(new[] { "try again", "aaliyah" }, queries);
-    }
+    public void ForMusicVideo_SendsNothingForABlankName()
+        => Assert.Empty(ReelbaseSearchQueries.ForMusicVideo("   "));
 
     [Fact]
     public void NormalizeName_TurnsUnderscoresIntoSpacesAndDropsTheExtension()

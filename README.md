@@ -134,14 +134,15 @@ The refresh dialog offers three choices, and only two of them reach a provider:
 To fix names in bulk, use **Replace all metadata** — on the item, on a folder, or on the whole
 library. The nightly task below does the same thing for the whole library on a schedule.
 
-Reelbase matches search terms as a single substring rather than word by word, so the plugin
-searches for the title first (after stripping the `Artist - ` prefix) and the artist second, then
-ranks the results by title, artist and year instead of trusting the API's ordering.
+Reelbase matches search terms as a single substring rather than word by word, so the item is
+submitted as the file names it: one query, the whole name, artist and title together, and the API
+decides whether the catalogue holds it. The results are then ranked by title, artist and year
+instead of trusting the API's ordering. The artist is never asked for on its own, and the name is
+not split up first.
 
-A title with a quote in it is asked for by the whole name first. The API matches a bare title
-literally, so ``Freedom `90`` finds nothing, while the ``Artist - Title`` form forgives the
-punctuation and finds ``Freedom! '90``. That only works when the file name still names the artist;
-a file called just ``What I`ve Done.mkv`` has nothing to pair the title with.
+The ``Artist - Title`` form is the one the API forgives punctuation for, so
+``George Michael - Freedom `90`` finds ``Freedom! '90``, while a bare title is matched
+literally and a file called just ``What I`ve Done.mkv`` has nothing to pair the title with.
 
 ## Building
 

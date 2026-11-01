@@ -115,7 +115,7 @@ foreach (var accented in new[]
     "Björk - Jóga",
 })
 {
-    var queries = ReelbaseSearchQueries.ForMusicVideo(accented, null);
+    var queries = ReelbaseSearchQueries.ForMusicVideo(accented);
     Console.WriteLine($"  {accented}");
     Console.WriteLine($"    queries: {string.Join(" ; ", queries)}");
     foreach (var accentedQuery in queries)

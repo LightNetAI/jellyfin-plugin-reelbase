@@ -264,7 +264,7 @@ public class ReelbaseMusicVideoProvider : IRemoteMetadataProvider<MusicVideo, Mu
     /// </summary>
     private async Task<ReelbaseVideo?> FindMatchAsync(MusicVideoInfo info, CancellationToken cancellationToken)
     {
-        foreach (var query in ReelbaseSearchQueries.ForMusicVideo(info.Name, info.Artists))
+        foreach (var query in ReelbaseSearchQueries.ForMusicVideo(info.Name))
         {
             var videos = await _client.SearchVideosAsync(query, cancellationToken).ConfigureAwait(false);
             var match = ReelbaseMatcher.FindBestMatch(videos, info.Name, info.Artists, info.Year);
@@ -285,7 +285,7 @@ public class ReelbaseMusicVideoProvider : IRemoteMetadataProvider<MusicVideo, Mu
     {
         var seen = new HashSet<string>(StringComparer.Ordinal);
         var candidates = new List<ReelbaseVideo>();
-        var queries = ReelbaseSearchQueries.ForMusicVideo(info.Name, info.Artists);
+        var queries = ReelbaseSearchQueries.ForMusicVideo(info.Name);
 
         foreach (var query in queries)
         {

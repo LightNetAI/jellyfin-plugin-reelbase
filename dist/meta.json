@@ -1,14 +1,14 @@
 {
     "category": "Music",
-    "changelog": "Ask again when a lookup finds nothing, so a record added to Reelbase is found on the next run instead of the next day.",
+    "changelog": "Send the item as the file names it, one query for the whole name, and let the server decide whether the catalogue holds it.",
     "description": "Get music video metadata and artwork from a Reelbase instance. Requires a Reelbase API key, which is free to create on any Reelbase site.",
     "guid": "816fb33f-67c2-485f-8f47-8c7877ea6e70",
     "name": "Reelbase",
     "overview": "Get music video metadata and artwork from Reelbase",
     "owner": "LightNetAI",
     "targetAbi": "12.0.0.0",
-    "timestamp": "2026-11-01T03:18:13Z",
-    "version": "1.5.7.0",
+    "timestamp": "2026-11-01T04:01:51Z",
+    "version": "1.6.0.0",
     "status": "Active",
     "autoUpdate": true
 }

@@ -1,19 +1,19 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Jellyfin.Plugin.Reelbase;
 
 /// <summary>
-/// Builds the search terms a library item should be looked up with.
+/// Builds the search term a library item should be looked up with.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Reelbase matches the whole <c>q</c> value as one substring of the title, the artist name or
-/// the description - it does not split it into words, and it does not forgive punctuation. A
-/// music video is usually named <c>Artist - Title</c>, so passing that through unchanged matches
-/// nothing; the artist part has to be taken off first.
+/// the description - it does not split it into words. The name is therefore sent as the file has
+/// it, artist and title together, and the server works out whether the catalogue holds it: the
+/// <c>Artist - Title</c> form is the one the API forgives punctuation for, while the bare title is
+/// matched literally. Splitting the name up here only spends more requests and finds less.
 /// </para>
 /// <para>
 /// Jellyfin does not tidy the name it hands over. A file called <c>aaliyah_-_try_again.avi</c>
@@ -29,54 +29,15 @@ public static class ReelbaseSearchQueries
     private static readonly string[] _separators = [" - ", " – ", " — ", " —", " -", " | "];
 
     /// <summary>
-    /// The punctuation a file name and a record most often disagree about: a straight quote, a
-    /// curly one, a backtick, an accent, an exclamation or a question mark.
-    /// </summary>
-    private static readonly SearchValues<char> _disputedPunctuation = SearchValues.Create("'\u2019\u0060\u00B4!?");
-
-    /// <summary>
-    /// Builds the queries to try, most specific first.
+    /// Builds the query to try.
     /// </summary>
     /// <param name="name">The name of the library item.</param>
-    /// <param name="artists">The artists Jellyfin knows the item belongs to.</param>
-    /// <returns>The queries to try in order.</returns>
-    public static IReadOnlyList<string> ForMusicVideo(string? name, IReadOnlyList<string>? artists)
+    /// <returns>The query to send, or an empty list when the name is blank.</returns>
+    public static IReadOnlyList<string> ForMusicVideo(string? name)
     {
-        var primaryArtist = FirstArtist(artists);
         var normalised = NormalizeName(name);
-        var title = StripArtistPrefix(normalised, primaryArtist);
-        var queries = new List<string>(3);
 
-        if (Split(normalised) is { } split)
-        {
-            // A title carrying a quote is where the file name and the record most often
-            // disagree about the character itself: a film of "Freedom! '90" saved as
-            // "Freedom `90" is not the same string. The bare title is matched literally and
-            // finds nothing, while the "Artist - Title" form has the punctuation forgiven and
-            // finds the record, so that form goes first when the title has one of them.
-            if (split.Title.AsSpan().IndexOfAny(_disputedPunctuation) >= 0)
-            {
-                Add(queries, normalised);
-            }
-
-            // Without a quote, the title only gets a turn of its own once the artist was known
-            // well enough to take it off the name with confidence; otherwise the halves the
-            // separator cut out are what is asked for.
-            if (!string.Equals(title, normalised, StringComparison.OrdinalIgnoreCase))
-            {
-                Add(queries, title);
-            }
-
-            Add(queries, split.Title);
-            Add(queries, primaryArtist ?? split.Artist);
-        }
-        else
-        {
-            Add(queries, title);
-            Add(queries, primaryArtist);
-        }
-
-        return queries;
+        return normalised.Length == 0 ? Array.Empty<string>() : new[] { normalised };
     }
 
     /// <summary>
@@ -218,46 +179,8 @@ public static class ReelbaseSearchQueries
         return true;
     }
 
-    private static string? FirstArtist(IReadOnlyList<string>? artists)
-    {
-        if (artists is null)
-        {
-            return null;
-        }
-
-        foreach (var artist in artists)
-        {
-            if (!string.IsNullOrWhiteSpace(artist))
-            {
-                return artist.Trim();
-            }
-        }
-
-        return null;
-    }
-
     private static bool Contains(string? value, string? other)
         => !string.IsNullOrWhiteSpace(value)
             && !string.IsNullOrWhiteSpace(other)
             && value.Contains(other.Trim(), StringComparison.OrdinalIgnoreCase);
-
-    private static void Add(List<string> queries, string? query)
-    {
-        if (string.IsNullOrWhiteSpace(query))
-        {
-            return;
-        }
-
-        var trimmed = query.Trim();
-
-        foreach (var existing in queries)
-        {
-            if (string.Equals(existing, trimmed, StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-        }
-
-        queries.Add(trimmed);
-    }
 }
