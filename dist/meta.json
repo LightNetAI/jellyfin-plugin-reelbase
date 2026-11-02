@@ -1,14 +1,14 @@
 {
     "category": "Music",
-    "changelog": "Send the item's file extension with the search, ext=mkv for a file and ext=null for a folder or a name with none, so the API can tell a file from a folder.",
+    "changelog": "Skip files whose extension Reelbase does not accept, checked against a local copy of the approved extension list, and download that list again only when the API's version number moves on.",
     "description": "Get music video metadata and artwork from a Reelbase instance. Requires a Reelbase API key, which is free to create on any Reelbase site.",
     "guid": "816fb33f-67c2-485f-8f47-8c7877ea6e70",
     "name": "Reelbase",
     "overview": "Get music video metadata and artwork from Reelbase",
     "owner": "LightNetAI",
     "targetAbi": "12.0.0.0",
-    "timestamp": "2026-11-02T00:26:46Z",
-    "version": "1.7.0.0",
+    "timestamp": "2026-11-02T01:28:15Z",
+    "version": "1.8.0.0",
     "status": "Active",
     "autoUpdate": true
 }

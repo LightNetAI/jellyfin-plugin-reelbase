@@ -61,4 +61,22 @@ public interface IReelbaseClient
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The person, or <c>null</c> when there is none.</returns>
     Task<ReelbasePerson?> GetPersonAsync(string slug, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the version of the approved extension list.
+    /// </summary>
+    /// <remarks>
+    /// The version is raised whenever an administrator adds or removes an extension, so a client
+    /// that already holds the list only has to download it again when this number changes.
+    /// </remarks>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The version, or <c>null</c> when the API did not answer.</returns>
+    Task<int?> GetExtensionsVersionAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Gets the approved extensions, with the version they belong to.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The list, or <c>null</c> when the API did not answer.</returns>
+    Task<ReelbaseExtensionListResponse?> GetExtensionsAsync(CancellationToken cancellationToken);
 }

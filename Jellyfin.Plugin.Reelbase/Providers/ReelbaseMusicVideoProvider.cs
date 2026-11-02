@@ -30,6 +30,7 @@ public class ReelbaseMusicVideoProvider : IRemoteMetadataProvider<MusicVideo, Mu
     private readonly ILogger<ReelbaseMusicVideoProvider> _logger;
     private readonly IReelbaseClient _client;
     private readonly ILibraryManager _libraryManager;
+    private readonly IReelbaseExtensionCatalog _extensions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ReelbaseMusicVideoProvider"/> class.
@@ -38,16 +39,19 @@ public class ReelbaseMusicVideoProvider : IRemoteMetadataProvider<MusicVideo, Mu
     /// <param name="logger">Instance of the <see cref="ILogger{ReelbaseMusicVideoProvider}"/> interface.</param>
     /// <param name="client">Instance of the <see cref="IReelbaseClient"/> interface.</param>
     /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
+    /// <param name="extensions">Instance of the <see cref="IReelbaseExtensionCatalog"/> interface.</param>
     public ReelbaseMusicVideoProvider(
         IHttpClientFactory httpClientFactory,
         ILogger<ReelbaseMusicVideoProvider> logger,
         IReelbaseClient client,
-        ILibraryManager libraryManager)
+        ILibraryManager libraryManager,
+        IReelbaseExtensionCatalog extensions)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _client = client;
         _libraryManager = libraryManager;
+        _extensions = extensions;
     }
 
     /// <inheritdoc />
@@ -265,6 +269,10 @@ public class ReelbaseMusicVideoProvider : IRemoteMetadataProvider<MusicVideo, Mu
     private async Task<ReelbaseVideo?> FindMatchAsync(MusicVideoInfo info, CancellationToken cancellationToken)
     {
         var extension = ReelbaseFileExtension.QueryValue(info.Path, info.Name);
+        if (!_extensions.IsAllowed(extension))
+        {
+            return null;
+        }
 
         foreach (var query in ReelbaseSearchQueries.ForMusicVideo(info.Name))
         {
@@ -289,6 +297,15 @@ public class ReelbaseMusicVideoProvider : IRemoteMetadataProvider<MusicVideo, Mu
         var candidates = new List<ReelbaseVideo>();
         var queries = ReelbaseSearchQueries.ForMusicVideo(info.Name);
         var extension = ReelbaseFileExtension.QueryValue(info.Path, info.Name);
+        if (!_extensions.IsAllowed(extension))
+        {
+            _logger.LogDebug(
+                "{Name} is a .{Extension} file, which the approved extension list does not accept; no request is sent.",
+                info.Name,
+                extension);
+
+            return Array.Empty<ReelbaseVideo>();
+        }
 
         foreach (var query in queries)
         {

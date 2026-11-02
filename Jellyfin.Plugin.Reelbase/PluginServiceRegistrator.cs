@@ -13,6 +13,8 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
         serviceCollection.AddSingleton<IReelbaseSettingsProvider, PluginSettingsProvider>();
+        serviceCollection.AddSingleton<IReelbaseExtensionCatalog, ReelbaseExtensionCatalog>();
+        serviceCollection.AddHostedService<ReelbaseExtensionCatalogStartup>();
         serviceCollection.AddSingleton<IReelbaseAllowanceStore, FileReelbaseAllowanceStore>();
         serviceCollection.AddSingleton<IReelbaseRateLimiter, ReelbaseRateLimiter>();
         serviceCollection.AddScoped<IReelbaseClient, ReelbaseClient>();

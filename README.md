@@ -149,6 +149,14 @@ or a name with none, so the API can tell the two apart and record a miss on a fi
 content. A dot inside the title is not an extension: ``Mr. Brightside`` and ``Song Vol. 2``
 both go up as `ext=null`.
 
+Reelbase only accepts certain extensions, and the list of them belongs to the site. The plugin
+keeps a copy in `plugins/configurations/Reelbase/extensions.json`, beside its configuration, and
+during a scan drops a file whose extension is not on that list **before** any request is made.
+A scan never fetches the list: at startup, and again at the start of the nightly task, the plugin
+asks `/api/v1/extensions/version` and downloads `/api/v1/extensions` only when that number has
+moved on. A server that has never reached the API allows everything, because the API refuses what
+it does not accept anyway, and a list that cannot be refreshed is kept rather than emptied.
+
 ## Building
 
 ```bash

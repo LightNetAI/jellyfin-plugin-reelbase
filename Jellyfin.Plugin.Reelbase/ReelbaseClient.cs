@@ -215,6 +215,31 @@ public class ReelbaseClient : IReelbaseClient
         return person;
     }
 
+    /// <inheritdoc />
+    public async Task<int?> GetExtensionsVersionAsync(CancellationToken cancellationToken)
+    {
+        var settings = _settingsProvider.Current;
+        var response = await GetResponseAsync<ReelbaseExtensionVersionResponse>(
+                $"{ApiPath}/extensions/version",
+                settings,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return response?.Data?.Version;
+    }
+
+    /// <inheritdoc />
+    public async Task<ReelbaseExtensionListResponse?> GetExtensionsAsync(CancellationToken cancellationToken)
+    {
+        var settings = _settingsProvider.Current;
+
+        return await GetResponseAsync<ReelbaseExtensionListResponse>(
+                $"{ApiPath}/extensions",
+                settings,
+                cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     /// <summary>
     /// Builds the video search path, which carries the extension the item was found with.
     /// </summary>

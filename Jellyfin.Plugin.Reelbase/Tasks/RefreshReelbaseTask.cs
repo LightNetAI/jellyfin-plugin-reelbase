@@ -7,6 +7,7 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Reelbase.Tasks;
@@ -32,6 +33,8 @@ public class RefreshReelbaseTask : IScheduledTask
     private readonly IReelbaseRateLimiter _rateLimiter;
     private readonly IReelbaseSettingsProvider _settingsProvider;
     private readonly IDirectoryService _directoryService;
+    private readonly IReelbaseExtensionCatalog _extensions;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<RefreshReelbaseTask> _logger;
 
     /// <summary>
@@ -42,6 +45,8 @@ public class RefreshReelbaseTask : IScheduledTask
     /// <param name="rateLimiter">Instance of the <see cref="IReelbaseRateLimiter"/> interface.</param>
     /// <param name="settingsProvider">Instance of the <see cref="IReelbaseSettingsProvider"/> interface.</param>
     /// <param name="directoryService">Instance of the <see cref="IDirectoryService"/> interface.</param>
+    /// <param name="extensions">Instance of the <see cref="IReelbaseExtensionCatalog"/> interface.</param>
+    /// <param name="scopeFactory">Instance of the <see cref="IServiceScopeFactory"/> interface.</param>
     /// <param name="logger">Instance of the <see cref="ILogger{RefreshReelbaseTask}"/> interface.</param>
     public RefreshReelbaseTask(
         ILibraryManager libraryManager,
@@ -49,6 +54,8 @@ public class RefreshReelbaseTask : IScheduledTask
         IReelbaseRateLimiter rateLimiter,
         IReelbaseSettingsProvider settingsProvider,
         IDirectoryService directoryService,
+        IReelbaseExtensionCatalog extensions,
+        IServiceScopeFactory scopeFactory,
         ILogger<RefreshReelbaseTask> logger)
     {
         _libraryManager = libraryManager;
@@ -56,6 +63,8 @@ public class RefreshReelbaseTask : IScheduledTask
         _rateLimiter = rateLimiter;
         _settingsProvider = settingsProvider;
         _directoryService = directoryService;
+        _extensions = extensions;
+        _scopeFactory = scopeFactory;
         _logger = logger;
     }
 
@@ -84,6 +93,33 @@ public class RefreshReelbaseTask : IScheduledTask
                 IntervalTicks = _interval.Ticks
             }
         ];
+    }
+
+    /// <summary>
+    /// Asks for the extension list version, and downloads the list when it has moved on.
+    /// </summary>
+    /// <remarks>
+    /// A list that has changed decides which files are looked up for the rest of the run, so this
+    /// happens before the first item is refreshed. It costs one request, and none at all when the
+    /// version is the one already saved.
+    /// </remarks>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that completes when the list is as fresh as it can be.</returns>
+    private async Task RefreshExtensionsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var client = scope.ServiceProvider.GetRequiredService<IReelbaseClient>();
+
+            await _extensions.RefreshAsync(client, cancellationToken).ConfigureAwait(false);
+        }
+#pragma warning disable CA1031 // The refresh itself is worth attempting even without the list.
+        catch (Exception ex)
+#pragma warning restore CA1031
+        {
+            _logger.LogWarning(ex, "Could not check the approved extension list before the refresh.");
+        }
     }
 
     /// <summary>
@@ -125,6 +161,8 @@ public class RefreshReelbaseTask : IScheduledTask
 
         // One fresh report for the run; the limiter counts the requests itself from there.
         _rateLimiter.BeginRun();
+
+        await RefreshExtensionsAsync(cancellationToken).ConfigureAwait(false);
 
         // A pause can outlive the process that was told about it, so the run starts by honouring it.
         if (_rateLimiter.PausedUntil is { } pausedUntil && pausedUntil > DateTimeOffset.UtcNow)

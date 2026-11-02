@@ -9,12 +9,12 @@
     "imageUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/assets/icon.png",
     "versions": [
       {
-        "version": "1.7.0.0",
-        "changelog": "Send the item's file extension with the search, ext=mkv for a file and ext=null for a folder or a name with none, so the API can tell a file from a folder.",
+        "version": "1.8.0.0",
+        "changelog": "Skip files whose extension Reelbase does not accept, checked against a local copy of the approved extension list, and download that list again only when the API's version number moves on.",
         "targetAbi": "12.0.0.0",
-        "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.7.0.0.zip",
-        "checksum": "2be1f8ad69f83813afc695a6c923a11e",
-        "timestamp": "2026-11-02T00:26:46Z"
+        "sourceUrl": "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/main/dist/reelbase_1.8.0.0.zip",
+        "checksum": "82adf4396c1efd054f3905235de52a11",
+        "timestamp": "2026-11-02T01:28:15Z"
       }
     ]
   }
