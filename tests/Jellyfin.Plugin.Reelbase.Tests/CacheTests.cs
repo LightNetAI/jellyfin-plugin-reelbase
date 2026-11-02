@@ -22,8 +22,8 @@ public class CacheTests
         var handler = new StubHandler("""{"data":[],"meta":{"page":1,"per_page":25,"total":0,"last_page":1}}""");
         var client = CreateClient(handler);
 
-        await client.SearchVideosAsync("Domingo, Netrebko & Villazón", CancellationToken.None);
-        await client.SearchVideosAsync("Domingo, Netrebko & Villazón", CancellationToken.None);
+        await client.SearchVideosAsync("Domingo, Netrebko & Villazón", "mkv", CancellationToken.None);
+        await client.SearchVideosAsync("Domingo, Netrebko & Villazón", "mkv", CancellationToken.None);
 
         Assert.Equal(2, handler.Calls);
     }
@@ -34,12 +34,25 @@ public class CacheTests
         var handler = new StubHandler("""{"data":[{"title":"Jóga","slug":"joga","artist":{"name":"Björk","slug":"bjork"}}]}""");
         var client = CreateClient(handler);
 
-        var first = await client.SearchVideosAsync("Björk", CancellationToken.None);
-        var second = await client.SearchVideosAsync("Björk", CancellationToken.None);
+        var first = await client.SearchVideosAsync("Björk", "mkv", CancellationToken.None);
+        var second = await client.SearchVideosAsync("Björk", "mkv", CancellationToken.None);
 
         Assert.Single(first);
         Assert.Single(second);
         Assert.Equal(1, handler.Calls);
+    }
+
+    [Fact]
+    public async Task TheRequestCarriesTheFileExtension()
+    {
+        var handler = new StubHandler("""{"data":[]}""");
+        var client = CreateClient(handler);
+
+        await client.SearchVideosAsync("Björk - Jóga", "mkv", CancellationToken.None);
+        await client.SearchVideosAsync("Linkin Park", ReelbaseFileExtension.None, CancellationToken.None);
+
+        Assert.Contains("ext=mkv", handler.Requests[0], StringComparison.Ordinal);
+        Assert.Contains("ext=null", handler.Requests[1], StringComparison.Ordinal);
     }
 
     private static ReelbaseClient CreateClient(HttpMessageHandler handler)
@@ -58,9 +71,12 @@ public class CacheTests
 
         public int Calls { get; private set; }
 
+        public List<string> Requests { get; } = new();
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             Calls++;
+            Requests.Add(request.RequestUri!.ToString());
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(_body, System.Text.Encoding.UTF8, "application/json")

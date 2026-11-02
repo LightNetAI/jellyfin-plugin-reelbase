@@ -14,9 +14,13 @@ public interface IReelbaseClient
     /// Searches the published videos.
     /// </summary>
     /// <param name="query">The text to search titles, artists and descriptions for.</param>
+    /// <param name="extension">
+    /// The item's file extension, or <see cref="ReelbaseFileExtension.None"/> for a folder or an
+    /// extensionless name.
+    /// </param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The videos on the first page of results.</returns>
-    Task<IReadOnlyList<ReelbaseVideo>> SearchVideosAsync(string query, CancellationToken cancellationToken);
+    Task<IReadOnlyList<ReelbaseVideo>> SearchVideosAsync(string query, string extension, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets one video by slug, with its credits and genres.

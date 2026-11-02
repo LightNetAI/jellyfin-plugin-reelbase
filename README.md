@@ -144,6 +144,11 @@ The ``Artist - Title`` form is the one the API forgives punctuation for, so
 ``George Michael - Freedom `90`` finds ``Freedom! '90``, while a bare title is matched
 literally and a file called just ``What I`ve Done.mkv`` has nothing to pair the title with.
 
+Each search also carries the item's extension, `ext=mkv` for a file and `ext=null` for a folder
+or a name with none, so the API can tell the two apart and record a miss on a file as missing
+content. A dot inside the title is not an extension: ``Mr. Brightside`` and ``Song Vol. 2``
+both go up as `ext=null`.
+
 ## Building
 
 ```bash

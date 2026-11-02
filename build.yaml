@@ -2,7 +2,7 @@
 name: "Reelbase"
 guid: "816fb33f-67c2-485f-8f47-8c7877ea6e70"
 imageUrl: "https://raw.githubusercontent.com/LightNetAI/jellyfin-plugin-reelbase/master/assets/icon.png"
-version: 16
+version: 17
 targetAbi: "12.0.0.0"
 framework: "net10.0"
 owner: "LightNetAI"
@@ -14,4 +14,5 @@ category: "Music"
 artifacts:
   - "Jellyfin.Plugin.Reelbase.dll"
 changelog: |-
+  - Send the item's file extension with the search, ext=mkv for a file and ext=null for a folder or a name with none, so the API can tell a file from a folder.
   - Send the item as the file names it, one query for the whole name, and let the server decide whether the catalogue holds it.

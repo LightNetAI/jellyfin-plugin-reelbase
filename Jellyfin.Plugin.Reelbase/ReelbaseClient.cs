@@ -96,11 +96,11 @@ public class ReelbaseClient : IReelbaseClient
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<ReelbaseVideo>> SearchVideosAsync(string query, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ReelbaseVideo>> SearchVideosAsync(string query, string extension, CancellationToken cancellationToken)
     {
         var settings = _settingsProvider.Current;
         var response = await GetResponseAsync<ReelbaseListResponse<ReelbaseVideo>>(
-                BuildSearchPath("/videos", query),
+                BuildVideoSearchPath(query, extension),
                 settings,
                 cancellationToken)
             .ConfigureAwait(false);
@@ -214,6 +214,21 @@ public class ReelbaseClient : IReelbaseClient
 
         return person;
     }
+
+    /// <summary>
+    /// Builds the video search path, which carries the extension the item was found with.
+    /// </summary>
+    /// <remarks>
+    /// A folder or an extensionless name is sent as <c>ext=null</c>: the API still searches, but a
+    /// miss is not recorded as missing content, because there is no file to add.
+    /// </remarks>
+    /// <param name="query">The text to search for.</param>
+    /// <param name="extension">The extension, or <see cref="ReelbaseFileExtension.None"/>.</param>
+    /// <returns>The path to request.</returns>
+    private static string BuildVideoSearchPath(string query, string extension)
+        => string.Create(
+            System.Globalization.CultureInfo.InvariantCulture,
+            $"{ApiPath}/videos?q={Uri.EscapeDataString(query ?? string.Empty)}&per_page={SearchPerPage}&ext={Uri.EscapeDataString(extension ?? ReelbaseFileExtension.None)}");
 
     private static string BuildSearchPath(string resource, string query)
         => string.Create(
